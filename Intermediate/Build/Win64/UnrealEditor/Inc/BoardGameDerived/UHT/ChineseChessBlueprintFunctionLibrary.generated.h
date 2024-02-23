@@ -20,20 +20,26 @@ enum class EChineseChessPlayer : uint8;
 #define FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_Helper_ChineseChessBlueprintFunctionLibrary_h_11_SPARSE_DATA
 #define FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_Helper_ChineseChessBlueprintFunctionLibrary_h_11_RPC_WRAPPERS \
  \
+	DECLARE_FUNCTION(execTransformPosToIndex); \
+	DECLARE_FUNCTION(execTransformIndexToPos); \
+	DECLARE_FUNCTION(execCheckPositionInBoard); \
 	DECLARE_FUNCTION(execAssessControl); \
-	DECLARE_FUNCTION(execIsBelongTo_Han); \
-	DECLARE_FUNCTION(execIsBelongTo_Chu); \
+	DECLARE_FUNCTION(execIsBelongTo); \
 	DECLARE_FUNCTION(execDecode); \
-	DECLARE_FUNCTION(execEncode);
+	DECLARE_FUNCTION(execEncode); \
+	DECLARE_FUNCTION(execGetInitState);
 
 
 #define FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_Helper_ChineseChessBlueprintFunctionLibrary_h_11_RPC_WRAPPERS_NO_PURE_DECLS \
  \
+	DECLARE_FUNCTION(execTransformPosToIndex); \
+	DECLARE_FUNCTION(execTransformIndexToPos); \
+	DECLARE_FUNCTION(execCheckPositionInBoard); \
 	DECLARE_FUNCTION(execAssessControl); \
-	DECLARE_FUNCTION(execIsBelongTo_Han); \
-	DECLARE_FUNCTION(execIsBelongTo_Chu); \
+	DECLARE_FUNCTION(execIsBelongTo); \
 	DECLARE_FUNCTION(execDecode); \
-	DECLARE_FUNCTION(execEncode);
+	DECLARE_FUNCTION(execEncode); \
+	DECLARE_FUNCTION(execGetInitState);
 
 
 #define FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_Helper_ChineseChessBlueprintFunctionLibrary_h_11_ACCESSORS

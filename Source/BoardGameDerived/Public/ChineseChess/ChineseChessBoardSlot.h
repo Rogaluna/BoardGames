@@ -87,4 +87,8 @@ protected:
 
 	void StartFadeOutEffect();
 	void CompleteFadeOut();
+
+protected:
+	UFUNCTION()
+	void OnMeshComponentClicked(UPrimitiveComponent* ClickedComp, FKey ButtonPressed);
 };

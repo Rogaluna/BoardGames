@@ -13,9 +13,9 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 	BOARDGAMEDERIVED_API UClass* Z_Construct_UClass_AChineseChessPawn();
 	BOARDGAMEDERIVED_API UClass* Z_Construct_UClass_AChineseChessPawn_NoRegister();
 	BOARDGAMEDERIVED_API UClass* Z_Construct_UClass_UChineseChessBoardSlot_NoRegister();
-	BOARDGAMEDERIVED_API UEnum* Z_Construct_UEnum_BoardGameDerived_EChineseChessCamp();
 	BOARDGAMEDERIVED_API UEnum* Z_Construct_UEnum_BoardGameDerived_EChineseChessControlPower();
 	BOARDGAMEDERIVED_API UEnum* Z_Construct_UEnum_BoardGameDerived_EChineseChessPawnState();
+	BOARDGAMEDERIVED_API UFunction* Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature();
 	BOARDGAMES_API UClass* Z_Construct_UClass_AGameBasePawn();
 	COREUOBJECT_API UScriptStruct* Z_Construct_UScriptStruct_FVector2D();
 	UPackage* Z_Construct_UPackage__Script_BoardGameDerived();
@@ -84,64 +84,6 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 		}
 		return Z_Registration_Info_UEnum_EChineseChessPawnState.InnerSingleton;
 	}
-	static FEnumRegistrationInfo Z_Registration_Info_UEnum_EChineseChessCamp;
-	static UEnum* EChineseChessCamp_StaticEnum()
-	{
-		if (!Z_Registration_Info_UEnum_EChineseChessCamp.OuterSingleton)
-		{
-			Z_Registration_Info_UEnum_EChineseChessCamp.OuterSingleton = GetStaticEnum(Z_Construct_UEnum_BoardGameDerived_EChineseChessCamp, (UObject*)Z_Construct_UPackage__Script_BoardGameDerived(), TEXT("EChineseChessCamp"));
-		}
-		return Z_Registration_Info_UEnum_EChineseChessCamp.OuterSingleton;
-	}
-	template<> BOARDGAMEDERIVED_API UEnum* StaticEnum<EChineseChessCamp>()
-	{
-		return EChineseChessCamp_StaticEnum();
-	}
-	struct Z_Construct_UEnum_BoardGameDerived_EChineseChessCamp_Statics
-	{
-		static const UECodeGen_Private::FEnumeratorParam Enumerators[];
-#if WITH_METADATA
-		static const UECodeGen_Private::FMetaDataPairParam Enum_MetaDataParams[];
-#endif
-		static const UECodeGen_Private::FEnumParams EnumParams;
-	};
-	const UECodeGen_Private::FEnumeratorParam Z_Construct_UEnum_BoardGameDerived_EChineseChessCamp_Statics::Enumerators[] = {
-		{ "EChineseChessCamp::None", (int64)EChineseChessCamp::None },
-		{ "EChineseChessCamp::Chu", (int64)EChineseChessCamp::Chu },
-		{ "EChineseChessCamp::Han", (int64)EChineseChessCamp::Han },
-	};
-#if WITH_METADATA
-	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UEnum_BoardGameDerived_EChineseChessCamp_Statics::Enum_MetaDataParams[] = {
-		{ "BlueprintType", "true" },
-		{ "Chu.DisplayName", "\xe6\xa5\x9a" },
-		{ "Chu.Name", "EChineseChessCamp::Chu" },
-		{ "Han.DisplayName", "\xe6\xb1\x89" },
-		{ "Han.Name", "EChineseChessCamp::Han" },
-		{ "ModuleRelativePath", "Public/ChineseChess/ChineseChessPawn.h" },
-		{ "None.DisplayName", "\xe6\x9c\xaa\xe8\xae\xbe\xe7\xbd\xae" },
-		{ "None.Name", "EChineseChessCamp::None" },
-	};
-#endif
-	const UECodeGen_Private::FEnumParams Z_Construct_UEnum_BoardGameDerived_EChineseChessCamp_Statics::EnumParams = {
-		(UObject*(*)())Z_Construct_UPackage__Script_BoardGameDerived,
-		nullptr,
-		"EChineseChessCamp",
-		"EChineseChessCamp",
-		Z_Construct_UEnum_BoardGameDerived_EChineseChessCamp_Statics::Enumerators,
-		UE_ARRAY_COUNT(Z_Construct_UEnum_BoardGameDerived_EChineseChessCamp_Statics::Enumerators),
-		RF_Public|RF_Transient|RF_MarkAsNative,
-		EEnumFlags::None,
-		(uint8)UEnum::ECppForm::EnumClass,
-		METADATA_PARAMS(Z_Construct_UEnum_BoardGameDerived_EChineseChessCamp_Statics::Enum_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UEnum_BoardGameDerived_EChineseChessCamp_Statics::Enum_MetaDataParams))
-	};
-	UEnum* Z_Construct_UEnum_BoardGameDerived_EChineseChessCamp()
-	{
-		if (!Z_Registration_Info_UEnum_EChineseChessCamp.InnerSingleton)
-		{
-			UECodeGen_Private::ConstructUEnum(Z_Registration_Info_UEnum_EChineseChessCamp.InnerSingleton, Z_Construct_UEnum_BoardGameDerived_EChineseChessCamp_Statics::EnumParams);
-		}
-		return Z_Registration_Info_UEnum_EChineseChessCamp.InnerSingleton;
-	}
 	static FEnumRegistrationInfo Z_Registration_Info_UEnum_EChineseChessControlPower;
 	static UEnum* EChineseChessControlPower_StaticEnum()
 	{
@@ -203,19 +145,56 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 		}
 		return Z_Registration_Info_UEnum_EChineseChessControlPower.InnerSingleton;
 	}
-	DEFINE_FUNCTION(AChineseChessPawn::execSetupSlot)
+	struct Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature_Statics
 	{
-		P_GET_OBJECT(UChineseChessBoardSlot,Z_Param_NewSlot);
-		P_FINISH;
-		P_NATIVE_BEGIN;
-		P_THIS->SetupSlot(Z_Param_NewSlot);
-		P_NATIVE_END;
+		struct ChineseChessPawn_eventPerformDelegate_Parms
+		{
+			EChineseChessPawnState PawnState;
+		};
+		static const UECodeGen_Private::FBytePropertyParams NewProp_PawnState_Underlying;
+		static const UECodeGen_Private::FEnumPropertyParams NewProp_PawnState;
+		static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
+#endif
+		static const UECodeGen_Private::FFunctionParams FuncParams;
+	};
+	const UECodeGen_Private::FBytePropertyParams Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature_Statics::NewProp_PawnState_Underlying = { "UnderlyingType", nullptr, (EPropertyFlags)0x0000000000000000, UECodeGen_Private::EPropertyGenFlags::Byte, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, 0, nullptr, METADATA_PARAMS(nullptr, 0) };
+	const UECodeGen_Private::FEnumPropertyParams Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature_Statics::NewProp_PawnState = { "PawnState", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(ChineseChessPawn_eventPerformDelegate_Parms, PawnState), Z_Construct_UEnum_BoardGameDerived_EChineseChessPawnState, METADATA_PARAMS(nullptr, 0) }; // 1557472555
+	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature_Statics::PropPointers[] = {
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature_Statics::NewProp_PawnState_Underlying,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature_Statics::NewProp_PawnState,
+	};
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature_Statics::Function_MetaDataParams[] = {
+		{ "ModuleRelativePath", "Public/ChineseChess/ChineseChessPawn.h" },
+	};
+#endif
+	const UECodeGen_Private::FFunctionParams Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_AChineseChessPawn, nullptr, "PerformDelegate__DelegateSignature", nullptr, nullptr, sizeof(Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature_Statics::ChineseChessPawn_eventPerformDelegate_Parms), Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature_Statics::PropPointers), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x00130000, 0, 0, METADATA_PARAMS(Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature_Statics::Function_MetaDataParams)) };
+	UFunction* Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature()
+	{
+		static UFunction* ReturnFunction = nullptr;
+		if (!ReturnFunction)
+		{
+			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature_Statics::FuncParams);
+		}
+		return ReturnFunction;
 	}
-	DEFINE_FUNCTION(AChineseChessPawn::execGetSlotPos)
+void AChineseChessPawn::FPerformDelegate_DelegateWrapper(const FMulticastScriptDelegate& PerformDelegate, EChineseChessPawnState PawnState)
+{
+	struct ChineseChessPawn_eventPerformDelegate_Parms
+	{
+		EChineseChessPawnState PawnState;
+	};
+	ChineseChessPawn_eventPerformDelegate_Parms Parms;
+	Parms.PawnState=PawnState;
+	PerformDelegate.ProcessMulticastDelegate<UObject>(&Parms);
+}
+	DEFINE_FUNCTION(AChineseChessPawn::execIsAlive)
 	{
 		P_FINISH;
 		P_NATIVE_BEGIN;
-		*(FVector2D*)Z_Param__Result=P_THIS->GetSlotPos();
+		*(bool*)Z_Param__Result=P_THIS->IsAlive();
 		P_NATIVE_END;
 	}
 	DEFINE_FUNCTION(AChineseChessPawn::execGetSlot)
@@ -225,18 +204,11 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 		*(UChineseChessBoardSlot**)Z_Param__Result=P_THIS->GetSlot();
 		P_NATIVE_END;
 	}
-	DEFINE_FUNCTION(AChineseChessPawn::execIsAlive)
+	DEFINE_FUNCTION(AChineseChessPawn::execGetGameManager)
 	{
 		P_FINISH;
 		P_NATIVE_BEGIN;
-		*(bool*)Z_Param__Result=P_THIS->IsAlive();
-		P_NATIVE_END;
-	}
-	DEFINE_FUNCTION(AChineseChessPawn::execGetGameManagerPtr)
-	{
-		P_FINISH;
-		P_NATIVE_BEGIN;
-		*(AChineseChessManager**)Z_Param__Result=P_THIS->GetGameManagerPtr();
+		*(AChineseChessManager**)Z_Param__Result=P_THIS->GetGameManager();
 		P_NATIVE_END;
 	}
 	DEFINE_FUNCTION(AChineseChessPawn::execGetPawnType)
@@ -244,6 +216,14 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 		P_FINISH;
 		P_NATIVE_BEGIN;
 		*(FString*)Z_Param__Result=P_THIS->GetPawnType();
+		P_NATIVE_END;
+	}
+	DEFINE_FUNCTION(AChineseChessPawn::execSetupSlot)
+	{
+		P_GET_OBJECT(UChineseChessBoardSlot,Z_Param_NewSlot);
+		P_FINISH;
+		P_NATIVE_BEGIN;
+		P_THIS->SetupSlot(Z_Param_NewSlot);
 		P_NATIVE_END;
 	}
 	DEFINE_FUNCTION(AChineseChessPawn::execSetState)
@@ -277,39 +257,13 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 		ProcessEvent(FindFunctionChecked(NAME_AChineseChessPawn_MoveRule),&Parms);
 		OutPositions=Parms.OutPositions;
 	}
-	static FName NAME_AChineseChessPawn_Perform_AbsencePawn = FName(TEXT("Perform_AbsencePawn"));
-	void AChineseChessPawn::Perform_AbsencePawn()
-	{
-		ProcessEvent(FindFunctionChecked(NAME_AChineseChessPawn_Perform_AbsencePawn),NULL);
-	}
-	static FName NAME_AChineseChessPawn_Perform_DeadPawn = FName(TEXT("Perform_DeadPawn"));
-	void AChineseChessPawn::Perform_DeadPawn()
-	{
-		ProcessEvent(FindFunctionChecked(NAME_AChineseChessPawn_Perform_DeadPawn),NULL);
-	}
-	static FName NAME_AChineseChessPawn_Perform_IdlePawn = FName(TEXT("Perform_IdlePawn"));
-	void AChineseChessPawn::Perform_IdlePawn()
-	{
-		ProcessEvent(FindFunctionChecked(NAME_AChineseChessPawn_Perform_IdlePawn),NULL);
-	}
-	static FName NAME_AChineseChessPawn_Perform_SelectedEnemyPawn = FName(TEXT("Perform_SelectedEnemyPawn"));
-	void AChineseChessPawn::Perform_SelectedEnemyPawn()
-	{
-		ProcessEvent(FindFunctionChecked(NAME_AChineseChessPawn_Perform_SelectedEnemyPawn),NULL);
-	}
-	static FName NAME_AChineseChessPawn_Perform_SelectedTeamPawn = FName(TEXT("Perform_SelectedTeamPawn"));
-	void AChineseChessPawn::Perform_SelectedTeamPawn()
-	{
-		ProcessEvent(FindFunctionChecked(NAME_AChineseChessPawn_Perform_SelectedTeamPawn),NULL);
-	}
 	void AChineseChessPawn::StaticRegisterNativesAChineseChessPawn()
 	{
 		UClass* Class = AChineseChessPawn::StaticClass();
 		static const FNameNativePtrPair Funcs[] = {
-			{ "GetGameManagerPtr", &AChineseChessPawn::execGetGameManagerPtr },
+			{ "GetGameManager", &AChineseChessPawn::execGetGameManager },
 			{ "GetPawnType", &AChineseChessPawn::execGetPawnType },
 			{ "GetSlot", &AChineseChessPawn::execGetSlot },
-			{ "GetSlotPos", &AChineseChessPawn::execGetSlotPos },
 			{ "IsAlive", &AChineseChessPawn::execIsAlive },
 			{ "OnRep_ChangeState", &AChineseChessPawn::execOnRep_ChangeState },
 			{ "SetState", &AChineseChessPawn::execSetState },
@@ -317,9 +271,9 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 		};
 		FNativeFunctionRegistrar::RegisterFunctions(Class, Funcs, UE_ARRAY_COUNT(Funcs));
 	}
-	struct Z_Construct_UFunction_AChineseChessPawn_GetGameManagerPtr_Statics
+	struct Z_Construct_UFunction_AChineseChessPawn_GetGameManager_Statics
 	{
-		struct ChineseChessPawn_eventGetGameManagerPtr_Parms
+		struct ChineseChessPawn_eventGetGameManager_Parms
 		{
 			AChineseChessManager* ReturnValue;
 		};
@@ -330,23 +284,23 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 #endif
 		static const UECodeGen_Private::FFunctionParams FuncParams;
 	};
-	const UECodeGen_Private::FObjectPropertyParams Z_Construct_UFunction_AChineseChessPawn_GetGameManagerPtr_Statics::NewProp_ReturnValue = { "ReturnValue", nullptr, (EPropertyFlags)0x0010000000000580, UECodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(ChineseChessPawn_eventGetGameManagerPtr_Parms, ReturnValue), Z_Construct_UClass_AChineseChessManager_NoRegister, METADATA_PARAMS(nullptr, 0) };
-	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UFunction_AChineseChessPawn_GetGameManagerPtr_Statics::PropPointers[] = {
-		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_AChineseChessPawn_GetGameManagerPtr_Statics::NewProp_ReturnValue,
+	const UECodeGen_Private::FObjectPropertyParams Z_Construct_UFunction_AChineseChessPawn_GetGameManager_Statics::NewProp_ReturnValue = { "ReturnValue", nullptr, (EPropertyFlags)0x0010000000000580, UECodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(ChineseChessPawn_eventGetGameManager_Parms, ReturnValue), Z_Construct_UClass_AChineseChessManager_NoRegister, METADATA_PARAMS(nullptr, 0) };
+	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UFunction_AChineseChessPawn_GetGameManager_Statics::PropPointers[] = {
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_AChineseChessPawn_GetGameManager_Statics::NewProp_ReturnValue,
 	};
 #if WITH_METADATA
-	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_AChineseChessPawn_GetGameManagerPtr_Statics::Function_MetaDataParams[] = {
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_AChineseChessPawn_GetGameManager_Statics::Function_MetaDataParams[] = {
 		{ "DisplayName", "\xe8\x8e\xb7\xe5\x8f\x96\xe5\x85\xb3\xe8\x81\x94\xe7\x9a\x84\xe7\xae\xa1\xe7\x90\x86\xe5\x99\xa8" },
 		{ "ModuleRelativePath", "Public/ChineseChess/ChineseChessPawn.h" },
 	};
 #endif
-	const UECodeGen_Private::FFunctionParams Z_Construct_UFunction_AChineseChessPawn_GetGameManagerPtr_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_AChineseChessPawn, nullptr, "GetGameManagerPtr", nullptr, nullptr, sizeof(Z_Construct_UFunction_AChineseChessPawn_GetGameManagerPtr_Statics::ChineseChessPawn_eventGetGameManagerPtr_Parms), Z_Construct_UFunction_AChineseChessPawn_GetGameManagerPtr_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UFunction_AChineseChessPawn_GetGameManagerPtr_Statics::PropPointers), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x54020401, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_AChineseChessPawn_GetGameManagerPtr_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_AChineseChessPawn_GetGameManagerPtr_Statics::Function_MetaDataParams)) };
-	UFunction* Z_Construct_UFunction_AChineseChessPawn_GetGameManagerPtr()
+	const UECodeGen_Private::FFunctionParams Z_Construct_UFunction_AChineseChessPawn_GetGameManager_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_AChineseChessPawn, nullptr, "GetGameManager", nullptr, nullptr, sizeof(Z_Construct_UFunction_AChineseChessPawn_GetGameManager_Statics::ChineseChessPawn_eventGetGameManager_Parms), Z_Construct_UFunction_AChineseChessPawn_GetGameManager_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UFunction_AChineseChessPawn_GetGameManager_Statics::PropPointers), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x54020401, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_AChineseChessPawn_GetGameManager_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_AChineseChessPawn_GetGameManager_Statics::Function_MetaDataParams)) };
+	UFunction* Z_Construct_UFunction_AChineseChessPawn_GetGameManager()
 	{
 		static UFunction* ReturnFunction = nullptr;
 		if (!ReturnFunction)
 		{
-			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_AChineseChessPawn_GetGameManagerPtr_Statics::FuncParams);
+			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_AChineseChessPawn_GetGameManager_Statics::FuncParams);
 		}
 		return ReturnFunction;
 	}
@@ -418,7 +372,7 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 	};
 #if WITH_METADATA
 	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_AChineseChessPawn_GetSlot_Statics::Function_MetaDataParams[] = {
-		{ "DisplayName", "\xe8\x8e\xb7\xe5\x8f\x96\xe5\xbd\x93\xe5\x89\x8d\xe6\xa3\x8b\xe5\xad\x90\xe6\xa7\xbd" },
+		{ "DisplayName", "\xe8\x8e\xb7\xe5\x8f\x96\xe5\xbd\x93\xe5\x89\x8d\xe6\xa3\x8b\xe5\xad\x90\xe6\xa7\xbd\xe5\xbc\x95\xe7\x94\xa8" },
 		{ "ModuleRelativePath", "Public/ChineseChess/ChineseChessPawn.h" },
 	};
 #endif
@@ -429,39 +383,6 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 		if (!ReturnFunction)
 		{
 			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_AChineseChessPawn_GetSlot_Statics::FuncParams);
-		}
-		return ReturnFunction;
-	}
-	struct Z_Construct_UFunction_AChineseChessPawn_GetSlotPos_Statics
-	{
-		struct ChineseChessPawn_eventGetSlotPos_Parms
-		{
-			FVector2D ReturnValue;
-		};
-		static const UECodeGen_Private::FStructPropertyParams NewProp_ReturnValue;
-		static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
-#if WITH_METADATA
-		static const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
-#endif
-		static const UECodeGen_Private::FFunctionParams FuncParams;
-	};
-	const UECodeGen_Private::FStructPropertyParams Z_Construct_UFunction_AChineseChessPawn_GetSlotPos_Statics::NewProp_ReturnValue = { "ReturnValue", nullptr, (EPropertyFlags)0x0010000000000580, UECodeGen_Private::EPropertyGenFlags::Struct, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(ChineseChessPawn_eventGetSlotPos_Parms, ReturnValue), Z_Construct_UScriptStruct_FVector2D, METADATA_PARAMS(nullptr, 0) };
-	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UFunction_AChineseChessPawn_GetSlotPos_Statics::PropPointers[] = {
-		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_AChineseChessPawn_GetSlotPos_Statics::NewProp_ReturnValue,
-	};
-#if WITH_METADATA
-	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_AChineseChessPawn_GetSlotPos_Statics::Function_MetaDataParams[] = {
-		{ "DisplayName", "\xe8\x8e\xb7\xe5\x8f\x96\xe5\xbd\x93\xe5\x89\x8d\xe6\xa3\x8b\xe5\xad\x90\xe6\xa7\xbd\xe4\xbd\x8d" },
-		{ "ModuleRelativePath", "Public/ChineseChess/ChineseChessPawn.h" },
-	};
-#endif
-	const UECodeGen_Private::FFunctionParams Z_Construct_UFunction_AChineseChessPawn_GetSlotPos_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_AChineseChessPawn, nullptr, "GetSlotPos", nullptr, nullptr, sizeof(Z_Construct_UFunction_AChineseChessPawn_GetSlotPos_Statics::ChineseChessPawn_eventGetSlotPos_Parms), Z_Construct_UFunction_AChineseChessPawn_GetSlotPos_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UFunction_AChineseChessPawn_GetSlotPos_Statics::PropPointers), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x54820401, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_AChineseChessPawn_GetSlotPos_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_AChineseChessPawn_GetSlotPos_Statics::Function_MetaDataParams)) };
-	UFunction* Z_Construct_UFunction_AChineseChessPawn_GetSlotPos()
-	{
-		static UFunction* ReturnFunction = nullptr;
-		if (!ReturnFunction)
-		{
-			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_AChineseChessPawn_GetSlotPos_Statics::FuncParams);
 		}
 		return ReturnFunction;
 	}
@@ -584,121 +505,6 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 		}
 		return ReturnFunction;
 	}
-	struct Z_Construct_UFunction_AChineseChessPawn_Perform_AbsencePawn_Statics
-	{
-#if WITH_METADATA
-		static const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
-#endif
-		static const UECodeGen_Private::FFunctionParams FuncParams;
-	};
-#if WITH_METADATA
-	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_AChineseChessPawn_Perform_AbsencePawn_Statics::Function_MetaDataParams[] = {
-		{ "DisplayName", "\xef\xbc\x88\xe8\xa1\xa8\xe6\xbc\x94\xef\xbc\x89\xe6\xa3\x8b\xe5\xad\x90\xe7\xbc\xba\xe5\xb8\xad" },
-		{ "ModuleRelativePath", "Public/ChineseChess/ChineseChessPawn.h" },
-	};
-#endif
-	const UECodeGen_Private::FFunctionParams Z_Construct_UFunction_AChineseChessPawn_Perform_AbsencePawn_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_AChineseChessPawn, nullptr, "Perform_AbsencePawn", nullptr, nullptr, 0, nullptr, 0, RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x0C020800, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_AChineseChessPawn_Perform_AbsencePawn_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_AChineseChessPawn_Perform_AbsencePawn_Statics::Function_MetaDataParams)) };
-	UFunction* Z_Construct_UFunction_AChineseChessPawn_Perform_AbsencePawn()
-	{
-		static UFunction* ReturnFunction = nullptr;
-		if (!ReturnFunction)
-		{
-			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_AChineseChessPawn_Perform_AbsencePawn_Statics::FuncParams);
-		}
-		return ReturnFunction;
-	}
-	struct Z_Construct_UFunction_AChineseChessPawn_Perform_DeadPawn_Statics
-	{
-#if WITH_METADATA
-		static const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
-#endif
-		static const UECodeGen_Private::FFunctionParams FuncParams;
-	};
-#if WITH_METADATA
-	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_AChineseChessPawn_Perform_DeadPawn_Statics::Function_MetaDataParams[] = {
-		{ "DisplayName", "\xef\xbc\x88\xe8\xa1\xa8\xe6\xbc\x94\xef\xbc\x89\xe6\xa3\x8b\xe5\xad\x90\xe6\xad\xbb\xe4\xba\xa1" },
-		{ "ModuleRelativePath", "Public/ChineseChess/ChineseChessPawn.h" },
-	};
-#endif
-	const UECodeGen_Private::FFunctionParams Z_Construct_UFunction_AChineseChessPawn_Perform_DeadPawn_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_AChineseChessPawn, nullptr, "Perform_DeadPawn", nullptr, nullptr, 0, nullptr, 0, RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x0C020800, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_AChineseChessPawn_Perform_DeadPawn_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_AChineseChessPawn_Perform_DeadPawn_Statics::Function_MetaDataParams)) };
-	UFunction* Z_Construct_UFunction_AChineseChessPawn_Perform_DeadPawn()
-	{
-		static UFunction* ReturnFunction = nullptr;
-		if (!ReturnFunction)
-		{
-			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_AChineseChessPawn_Perform_DeadPawn_Statics::FuncParams);
-		}
-		return ReturnFunction;
-	}
-	struct Z_Construct_UFunction_AChineseChessPawn_Perform_IdlePawn_Statics
-	{
-#if WITH_METADATA
-		static const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
-#endif
-		static const UECodeGen_Private::FFunctionParams FuncParams;
-	};
-#if WITH_METADATA
-	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_AChineseChessPawn_Perform_IdlePawn_Statics::Function_MetaDataParams[] = {
-		{ "DisplayName", "\xef\xbc\x88\xe8\xa1\xa8\xe6\xbc\x94\xef\xbc\x89\xe6\xa3\x8b\xe5\xad\x90\xe9\x97\xb2\xe7\xbd\xae" },
-		{ "ModuleRelativePath", "Public/ChineseChess/ChineseChessPawn.h" },
-	};
-#endif
-	const UECodeGen_Private::FFunctionParams Z_Construct_UFunction_AChineseChessPawn_Perform_IdlePawn_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_AChineseChessPawn, nullptr, "Perform_IdlePawn", nullptr, nullptr, 0, nullptr, 0, RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x0C020800, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_AChineseChessPawn_Perform_IdlePawn_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_AChineseChessPawn_Perform_IdlePawn_Statics::Function_MetaDataParams)) };
-	UFunction* Z_Construct_UFunction_AChineseChessPawn_Perform_IdlePawn()
-	{
-		static UFunction* ReturnFunction = nullptr;
-		if (!ReturnFunction)
-		{
-			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_AChineseChessPawn_Perform_IdlePawn_Statics::FuncParams);
-		}
-		return ReturnFunction;
-	}
-	struct Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedEnemyPawn_Statics
-	{
-#if WITH_METADATA
-		static const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
-#endif
-		static const UECodeGen_Private::FFunctionParams FuncParams;
-	};
-#if WITH_METADATA
-	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedEnemyPawn_Statics::Function_MetaDataParams[] = {
-		{ "DisplayName", "\xef\xbc\x88\xe8\xa1\xa8\xe6\xbc\x94\xef\xbc\x89\xe6\x95\x8c\xe6\x96\xb9\xe6\xa3\x8b\xe5\xad\x90\xe8\xa2\xab\xe9\x80\x89\xe4\xb8\xad" },
-		{ "ModuleRelativePath", "Public/ChineseChess/ChineseChessPawn.h" },
-	};
-#endif
-	const UECodeGen_Private::FFunctionParams Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedEnemyPawn_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_AChineseChessPawn, nullptr, "Perform_SelectedEnemyPawn", nullptr, nullptr, 0, nullptr, 0, RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x0C020800, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedEnemyPawn_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedEnemyPawn_Statics::Function_MetaDataParams)) };
-	UFunction* Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedEnemyPawn()
-	{
-		static UFunction* ReturnFunction = nullptr;
-		if (!ReturnFunction)
-		{
-			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedEnemyPawn_Statics::FuncParams);
-		}
-		return ReturnFunction;
-	}
-	struct Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedTeamPawn_Statics
-	{
-#if WITH_METADATA
-		static const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
-#endif
-		static const UECodeGen_Private::FFunctionParams FuncParams;
-	};
-#if WITH_METADATA
-	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedTeamPawn_Statics::Function_MetaDataParams[] = {
-		{ "DisplayName", "\xef\xbc\x88\xe8\xa1\xa8\xe6\xbc\x94\xef\xbc\x89\xe5\x8f\x8b\xe6\x96\xb9\xe6\xa3\x8b\xe5\xad\x90\xe8\xa2\xab\xe9\x80\x89\xe4\xb8\xad" },
-		{ "ModuleRelativePath", "Public/ChineseChess/ChineseChessPawn.h" },
-	};
-#endif
-	const UECodeGen_Private::FFunctionParams Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedTeamPawn_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_AChineseChessPawn, nullptr, "Perform_SelectedTeamPawn", nullptr, nullptr, 0, nullptr, 0, RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x0C020800, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedTeamPawn_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedTeamPawn_Statics::Function_MetaDataParams)) };
-	UFunction* Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedTeamPawn()
-	{
-		static UFunction* ReturnFunction = nullptr;
-		if (!ReturnFunction)
-		{
-			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedTeamPawn_Statics::FuncParams);
-		}
-		return ReturnFunction;
-	}
 	struct Z_Construct_UFunction_AChineseChessPawn_SetState_Statics
 	{
 		struct ChineseChessPawn_eventSetState_Parms
@@ -762,7 +568,7 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 	};
 #if WITH_METADATA
 	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_AChineseChessPawn_SetupSlot_Statics::Function_MetaDataParams[] = {
-		{ "DisplayName", "\xe5\xb0\x86\xe6\xa3\x8b\xe5\xad\x90\xe5\xae\x89\xe6\x94\xbe\xe5\x88\xb0\xe6\xa7\xbd\xe4\xbd\x8d" },
+		{ "DisplayName", "\xe5\xb0\x86\xe6\xa3\x8b\xe5\xad\x90\xe8\xae\xbe\xe7\xbd\xae\xe5\x88\xb0\xe6\xa7\xbd\xe4\xbd\x8d" },
 		{ "ModuleRelativePath", "Public/ChineseChess/ChineseChessPawn.h" },
 	};
 #endif
@@ -794,9 +600,9 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 #endif
 		static const UECodeGen_Private::FEnumPropertyParams NewProp_State;
 #if WITH_METADATA
-		static const UECodeGen_Private::FMetaDataPairParam NewProp_GameManagerPtr_MetaData[];
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_GameManager_MetaData[];
 #endif
-		static const UECodeGen_Private::FObjectPropertyParams NewProp_GameManagerPtr;
+		static const UECodeGen_Private::FObjectPropertyParams NewProp_GameManager;
 		static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
 		static const FCppClassTypeInfoStatic StaticCppClassTypeInfo;
 		static const UECodeGen_Private::FClassParams ClassParams;
@@ -806,20 +612,15 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 		(UObject* (*)())Z_Construct_UPackage__Script_BoardGameDerived,
 	};
 	const FClassFunctionLinkInfo Z_Construct_UClass_AChineseChessPawn_Statics::FuncInfo[] = {
-		{ &Z_Construct_UFunction_AChineseChessPawn_GetGameManagerPtr, "GetGameManagerPtr" }, // 3410136505
+		{ &Z_Construct_UFunction_AChineseChessPawn_GetGameManager, "GetGameManager" }, // 3778223141
 		{ &Z_Construct_UFunction_AChineseChessPawn_GetPawnType, "GetPawnType" }, // 3639816862
-		{ &Z_Construct_UFunction_AChineseChessPawn_GetSlot, "GetSlot" }, // 141933270
-		{ &Z_Construct_UFunction_AChineseChessPawn_GetSlotPos, "GetSlotPos" }, // 2613001142
+		{ &Z_Construct_UFunction_AChineseChessPawn_GetSlot, "GetSlot" }, // 894646635
 		{ &Z_Construct_UFunction_AChineseChessPawn_IsAlive, "IsAlive" }, // 4174227107
 		{ &Z_Construct_UFunction_AChineseChessPawn_MoveRule, "MoveRule" }, // 3498223877
 		{ &Z_Construct_UFunction_AChineseChessPawn_OnRep_ChangeState, "OnRep_ChangeState" }, // 1127622534
-		{ &Z_Construct_UFunction_AChineseChessPawn_Perform_AbsencePawn, "Perform_AbsencePawn" }, // 4103895951
-		{ &Z_Construct_UFunction_AChineseChessPawn_Perform_DeadPawn, "Perform_DeadPawn" }, // 3060882090
-		{ &Z_Construct_UFunction_AChineseChessPawn_Perform_IdlePawn, "Perform_IdlePawn" }, // 1584815239
-		{ &Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedEnemyPawn, "Perform_SelectedEnemyPawn" }, // 320614442
-		{ &Z_Construct_UFunction_AChineseChessPawn_Perform_SelectedTeamPawn, "Perform_SelectedTeamPawn" }, // 2635354398
+		{ &Z_Construct_UDelegateFunction_AChineseChessPawn_PerformDelegate__DelegateSignature, "PerformDelegate__DelegateSignature" }, // 515441820
 		{ &Z_Construct_UFunction_AChineseChessPawn_SetState, "SetState" }, // 1191814538
-		{ &Z_Construct_UFunction_AChineseChessPawn_SetupSlot, "SetupSlot" }, // 1368466745
+		{ &Z_Construct_UFunction_AChineseChessPawn_SetupSlot, "SetupSlot" }, // 2062652504
 	};
 #if WITH_METADATA
 	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_AChineseChessPawn_Statics::Class_MetaDataParams[] = {
@@ -837,15 +638,15 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 #endif
 	const UECodeGen_Private::FEnumPropertyParams Z_Construct_UClass_AChineseChessPawn_Statics::NewProp_State = { "State", "OnRep_ChangeState", (EPropertyFlags)0x0020080100000020, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(AChineseChessPawn, State), Z_Construct_UEnum_BoardGameDerived_EChineseChessPawnState, METADATA_PARAMS(Z_Construct_UClass_AChineseChessPawn_Statics::NewProp_State_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_AChineseChessPawn_Statics::NewProp_State_MetaData)) }; // 1557472555
 #if WITH_METADATA
-	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_AChineseChessPawn_Statics::NewProp_GameManagerPtr_MetaData[] = {
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UClass_AChineseChessPawn_Statics::NewProp_GameManager_MetaData[] = {
 		{ "ModuleRelativePath", "Public/ChineseChess/ChineseChessPawn.h" },
 	};
 #endif
-	const UECodeGen_Private::FObjectPropertyParams Z_Construct_UClass_AChineseChessPawn_Statics::NewProp_GameManagerPtr = { "GameManagerPtr", nullptr, (EPropertyFlags)0x0020080000000020, UECodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(AChineseChessPawn, GameManagerPtr), Z_Construct_UClass_AChineseChessManager_NoRegister, METADATA_PARAMS(Z_Construct_UClass_AChineseChessPawn_Statics::NewProp_GameManagerPtr_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_AChineseChessPawn_Statics::NewProp_GameManagerPtr_MetaData)) };
+	const UECodeGen_Private::FObjectPropertyParams Z_Construct_UClass_AChineseChessPawn_Statics::NewProp_GameManager = { "GameManager", nullptr, (EPropertyFlags)0x0020080000000020, UECodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(AChineseChessPawn, GameManager), Z_Construct_UClass_AChineseChessManager_NoRegister, METADATA_PARAMS(Z_Construct_UClass_AChineseChessPawn_Statics::NewProp_GameManager_MetaData, UE_ARRAY_COUNT(Z_Construct_UClass_AChineseChessPawn_Statics::NewProp_GameManager_MetaData)) };
 	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UClass_AChineseChessPawn_Statics::PropPointers[] = {
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AChineseChessPawn_Statics::NewProp_State_Underlying,
 		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AChineseChessPawn_Statics::NewProp_State,
-		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AChineseChessPawn_Statics::NewProp_GameManagerPtr,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_AChineseChessPawn_Statics::NewProp_GameManager,
 	};
 	const FCppClassTypeInfoStatic Z_Construct_UClass_AChineseChessPawn_Statics::StaticCppClassTypeInfo = {
 		TCppClassTypeTraits<AChineseChessPawn>::IsAbstract,
@@ -881,11 +682,11 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 	void AChineseChessPawn::ValidateGeneratedRepEnums(const TArray<struct FRepRecord>& ClassReps) const
 	{
 		static const FName Name_State(TEXT("State"));
-		static const FName Name_GameManagerPtr(TEXT("GameManagerPtr"));
+		static const FName Name_GameManager(TEXT("GameManager"));
 
 		const bool bIsValid = true
 			&& Name_State == ClassReps[(int32)ENetFields_Private::State].Property->GetFName()
-			&& Name_GameManagerPtr == ClassReps[(int32)ENetFields_Private::GameManagerPtr].Property->GetFName();
+			&& Name_GameManager == ClassReps[(int32)ENetFields_Private::GameManager].Property->GetFName();
 
 		checkf(bIsValid, TEXT("UHT Generated Rep Indices do not match runtime populated Rep Indices for properties in AChineseChessPawn"));
 	}
@@ -898,13 +699,12 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessPawn() {}
 	};
 	const FEnumRegisterCompiledInInfo Z_CompiledInDeferFile_FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessPawn_h_Statics::EnumInfo[] = {
 		{ EChineseChessPawnState_StaticEnum, TEXT("EChineseChessPawnState"), &Z_Registration_Info_UEnum_EChineseChessPawnState, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 1557472555U) },
-		{ EChineseChessCamp_StaticEnum, TEXT("EChineseChessCamp"), &Z_Registration_Info_UEnum_EChineseChessCamp, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 1000990637U) },
 		{ EChineseChessControlPower_StaticEnum, TEXT("EChineseChessControlPower"), &Z_Registration_Info_UEnum_EChineseChessControlPower, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 2636232700U) },
 	};
 	const FClassRegisterCompiledInInfo Z_CompiledInDeferFile_FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessPawn_h_Statics::ClassInfo[] = {
-		{ Z_Construct_UClass_AChineseChessPawn, AChineseChessPawn::StaticClass, TEXT("AChineseChessPawn"), &Z_Registration_Info_UClass_AChineseChessPawn, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(AChineseChessPawn), 359649149U) },
+		{ Z_Construct_UClass_AChineseChessPawn, AChineseChessPawn::StaticClass, TEXT("AChineseChessPawn"), &Z_Registration_Info_UClass_AChineseChessPawn, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(AChineseChessPawn), 1442517448U) },
 	};
-	static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessPawn_h_4174930471(TEXT("/Script/BoardGameDerived"),
+	static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessPawn_h_3324667583(TEXT("/Script/BoardGameDerived"),
 		Z_CompiledInDeferFile_FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessPawn_h_Statics::ClassInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessPawn_h_Statics::ClassInfo),
 		nullptr, 0,
 		Z_CompiledInDeferFile_FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessPawn_h_Statics::EnumInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessPawn_h_Statics::EnumInfo));

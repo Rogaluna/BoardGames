@@ -1,9 +1,9 @@
 ﻿#include "ChineseChess/Helper/ChineseChessBlueprintFunctionLibrary.h"
 #include "ChineseChess/Helper/ChineseChessSet.h"
 
-FVector2D UChineseChessSetFunctionLibrary::GetBoardSize()
+TArray<FString> UChineseChessSetFunctionLibrary::GetInitState()
 {
-	return FVector2D(ChineseChessSet::BOARDSIZE_X, ChineseChessSet::BOARDSIZE_Y);
+	return ChineseChessSet::InitState;
 }
 
 uint8 UChineseChessSetFunctionLibrary::Encode(const FString& S_PawnType)
@@ -16,17 +16,36 @@ FString UChineseChessSetFunctionLibrary::Decode(const uint8& I_PawnType)
 	return ChineseChessSet::Decode(I_PawnType);
 }
 
-bool UChineseChessSetFunctionLibrary::IsBelongTo_Chu(uint8 PawnCode)
+EChineseChessPlayer UChineseChessSetFunctionLibrary::IsBelongTo(uint8 PawnCode)
 {
-	return !(PawnCode >> 3);
-}
-
-bool UChineseChessSetFunctionLibrary::IsBelongTo_Han(uint8 PawnCode)
-{
-	return PawnCode >> 3;
+	return (EChineseChessPlayer)(PawnCode >> 3);
 }
 
 bool UChineseChessSetFunctionLibrary::AssessControl(AChineseChessManager* InManager, APlayerState* InPlayerState, EChineseChessPlayer InPlayerCamp)
 {
-	return InManager->IsPlayerCamp(InPlayerState, InPlayerCamp);
+	EChineseChessPlayer PlayerCamp;
+	if (InManager->GetPlayerCamp(InPlayerState, PlayerCamp))
+	{
+		if (InPlayerCamp == PlayerCamp)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+bool UChineseChessSetFunctionLibrary::CheckPositionInBoard(const FVector2D& InVec)
+{
+	return InVec.X >= 0 && InVec.X < BOARDSIZE_X
+		&& InVec.Y >= 0 && InVec.Y < BOARDSIZE_Y;
+}
+
+FVector2D UChineseChessSetFunctionLibrary::TransformIndexToPos(const int32& Index)
+{
+	return FVector2D(Index % BOARDSIZE_X, Index / BOARDSIZE_X);
+}
+
+int32 UChineseChessSetFunctionLibrary::TransformPosToIndex(const FVector2D& Pos)
+{
+	return Pos.X + Pos.Y * BOARDSIZE_X;
 }

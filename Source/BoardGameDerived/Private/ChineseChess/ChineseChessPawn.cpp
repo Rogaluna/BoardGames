@@ -7,16 +7,17 @@
 #include "ChineseChess/Helper/ChineseChessBlueprintFunctionLibrary.h"
 #include "ChineseChess/Helper/ChineseChessSet.h"
 #include "Net/UnrealNetwork.h"
+#include "ChineseChess/ChineseChessBoard.h"
 
 AChineseChessPawn::AChineseChessPawn() :
-	Status(EChineseChessPawnStatus::None)
+	State(EChineseChessPawnState::None)
 {
 	bReplicates = true;
 }
 
 void AChineseChessPawn::OnPerform()
 {
-	Perform.Broadcast(Status);
+	Perform.Broadcast(State);
 }
 
 void AChineseChessPawn::NotifyActorOnClicked(FKey ButtonPressed /*= EKeys::LeftMouseButton*/)
@@ -44,11 +45,11 @@ void AChineseChessPawn::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(AChineseChessPawn, Status);
+	DOREPLIFETIME(AChineseChessPawn, State);
 	DOREPLIFETIME(AChineseChessPawn, GameManager);
 }
 
-void AChineseChessPawn::OnRep_ChangeStatus()
+void AChineseChessPawn::OnRep_ChangeState()
 {
 	UpdateState();
 }
@@ -58,9 +59,9 @@ void AChineseChessPawn::SetGameManager(AChineseChessManager* InGameManagerPtr)
 	GameManager = InGameManagerPtr;
 }
 
-void AChineseChessPawn::SetStatus(EChineseChessPawnStatus NewState)
+void AChineseChessPawn::SetState(EChineseChessPawnState NewState)
 {
-	Status = NewState;
+	State = NewState;
 	UpdateState();
 }
 
@@ -74,7 +75,7 @@ void AChineseChessPawn::Initialize(const FString& InPawnType, AChineseChessManag
 
 bool AChineseChessPawn::IsAlive()
 {
-	if (Status == EChineseChessPawnStatus::Dead)
+	if (State == EChineseChessPawnState::Dead)
 	{
 		return false;
 	}
@@ -83,7 +84,7 @@ bool AChineseChessPawn::IsAlive()
 
 void AChineseChessPawn::InitializeStatus()
 {
-	SetStatus(EChineseChessPawnStatus::Absence);
+	SetState(EChineseChessPawnState::Absence);
 }
 
 void AChineseChessPawn::MovePawn(UChineseChessBoardSlot* NewSlot)
@@ -95,17 +96,9 @@ void AChineseChessPawn::MovePawn(UChineseChessBoardSlot* NewSlot)
 	SetupSlot(NewSlot);
 }
 
-void AChineseChessPawn::MovePawn(const FVector2D& NewPos)
-{
-	if (UChineseChessBoardSlot* NewSlot = GameManager->GetSlot(NewPos))
-	{
-		MovePawn(NewSlot);
-	}
-}
-
 void AChineseChessPawn::Die()
 {
-	SetStatus(EChineseChessPawnStatus::Dead);
+	SetState(EChineseChessPawnState::Dead);
 }
 
 UChineseChessBoardSlot* AChineseChessPawn::GetSlot()
@@ -117,22 +110,22 @@ void AChineseChessPawn::SetupSlot(UChineseChessBoardSlot* NewSlot)
 {
 	AttachedSlot = NewSlot;
 	NewSlot->EnterPawn(this);
-	SetStatus(EChineseChessPawnStatus::Idle);
+	SetState(EChineseChessPawnState::Idle);
 }
 
 void AChineseChessPawn::UpdateState()
 {
-	switch (Status)
+	switch (State)
 	{
-	case EChineseChessPawnStatus::Absence:
+	case EChineseChessPawnState::Absence:
 		GetRootComponent()->SetVisibility(true);
 		break;
-	case EChineseChessPawnStatus::Idle:
+	case EChineseChessPawnState::Idle:
 		SetChannelEffect(ECC_Visibility, ECR_Ignore);
 		break;
-	case EChineseChessPawnStatus::Selected:
+	case EChineseChessPawnState::Selected:
 		break;
-	case EChineseChessPawnStatus::Dead:
+	case EChineseChessPawnState::Dead:
 		GetRootComponent()->SetVisibility(false);
 		break;
 	default:

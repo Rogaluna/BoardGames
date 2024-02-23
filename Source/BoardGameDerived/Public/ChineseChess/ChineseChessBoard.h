@@ -23,14 +23,11 @@ class BOARDGAMEDERIVED_API AChineseChessBoard : public AGameBaseBoard
 	// 委托声明
 public:
 	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSlotClickedDelegate, UChineseChessBoardSlot*, Slot);
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FPlayerEnteredDelegate, EChineseChessPlayer, PlayerCamp, APlayerState*, Player);
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FPlayerLeftDelegate, EChineseChessPlayer, PlayerCamp, APlayerState*, Player)
 	
 	// 委托
 public:
+	UPROPERTY(BlueprintAssignable)
 	FSlotClickedDelegate SlotClicked;
-	FPlayerEnteredDelegate PlayerEntered;
-	FPlayerLeftDelegate PlayerLeft;
 
 	// 委托触发函数
 public:
@@ -40,8 +37,6 @@ public:
 	* 嗯...优雅的代码
 	*/
 	void OnSlotClicked(UChineseChessBoardSlot* Slot);
-	void OnPlayerEntered(EChineseChessPlayer PlayerCamp, APlayerState* Player);
-	void OnPlayerLeft(EChineseChessPlayer PlayerCamp, APlayerState* Player);
 
 	// 构造函数
 public:
@@ -92,16 +87,10 @@ public:
 	UFUNCTION(BlueprintPure, DisplayName = "获取棋盘尺寸")
 	const FVector2D GetBoardSize() const { return BoardSize; };
 
-	UFUNCTION(BlueprintPure, DisplayName="检查位置是否处于棋盘上")
-	FORCEINLINE bool CheckPositionInBoard(const FVector2D& InVec);
-
 	UFUNCTION(BlueprintCallable, DisplayName = "处理槽点击")
 	void HandleSlotClicked(UGameBaseBoardSlot* BaseSlot, APlayerState* PlayerState);
 
 	// operate
 public:
 
-protected:
-	UFUNCTION()
-	void OnMeshComponentClicked(UPrimitiveComponent* ClickedComp, FKey ButtonPressed);
 };

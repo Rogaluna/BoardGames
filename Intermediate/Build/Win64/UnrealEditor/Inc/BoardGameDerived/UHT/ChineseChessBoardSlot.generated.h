@@ -9,7 +9,9 @@
 #include "UObject/ScriptMacros.h"
 
 PRAGMA_DISABLE_DEPRECATION_WARNINGS
+class UPrimitiveComponent;
 enum class EHeightLightType : uint8;
+struct FKey;
 #ifdef BOARDGAMEDERIVED_ChineseChessBoardSlot_generated_h
 #error "ChineseChessBoardSlot.generated.h already included, missing '#pragma once' in ChineseChessBoardSlot.h"
 #endif
@@ -18,12 +20,14 @@ enum class EHeightLightType : uint8;
 #define FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessBoardSlot_h_28_SPARSE_DATA
 #define FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessBoardSlot_h_28_RPC_WRAPPERS \
  \
+	DECLARE_FUNCTION(execOnMeshComponentClicked); \
 	DECLARE_FUNCTION(execGetSlotPos); \
 	DECLARE_FUNCTION(execSetHeightLight);
 
 
 #define FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessBoardSlot_h_28_RPC_WRAPPERS_NO_PURE_DECLS \
  \
+	DECLARE_FUNCTION(execOnMeshComponentClicked); \
 	DECLARE_FUNCTION(execGetSlotPos); \
 	DECLARE_FUNCTION(execSetHeightLight);
 

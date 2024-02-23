@@ -1,5 +1,23 @@
 {
 	"RemapUnityFiles": 
 	{
+		"Module.BoardGameDerived.cpp.obj": [
+			"BoardGameDerived.init.gen.cpp.obj",
+			"ChineseChessBlueprintFunctionLibrary.gen.cpp.obj",
+			"ChineseChessBoard.gen.cpp.obj",
+			"ChineseChessBoardSlot.gen.cpp.obj",
+			"ChineseChessHistoryRecorder.gen.cpp.obj",
+			"ChineseChessManager.gen.cpp.obj",
+			"ChineseChessPawn.gen.cpp.obj",
+			"ChineseChessSet.gen.cpp.obj",
+			"BoardGameDerived.cpp.obj",
+			"ChineseChessBoard.cpp.obj",
+			"ChineseChessBoardSlot.cpp.obj",
+			"ChineseChessPawn.cpp.obj",
+			"ChineseChessBlueprintFunctionLibrary.cpp.obj",
+			"ChineseChessHistoryRecorder.cpp.obj",
+			"ChineseChessManager.cpp.obj",
+			"ChineseChessSet.cpp.obj"
+		]
 	}
 }

@@ -75,6 +75,8 @@ void UChineseChessBoardSlot::PostInitializeComponent()
 {
 	Super::PostInitializeComponent();
 
+	OnClicked.AddDynamic(this, &UChineseChessBoardSlot::OnMeshComponentClicked);
+
 	if (HeightLightComponent)
 	{
 		HeightLightComponent->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
@@ -104,6 +106,15 @@ void UChineseChessBoardSlot::ExitPawn()
 	if (IsOccupied())
 	{
 		ClearSlot();
+	}
+}
+
+void UChineseChessBoardSlot::OnMeshComponentClicked(UPrimitiveComponent* ClickedComp, FKey ButtonPressed)
+{
+	UE_LOG(LogTemp, Log, L"ClickedSlot");
+	if (AChineseChessBoard* Board = Cast<AChineseChessBoard>(GetOwner()))
+	{
+		Board->OnSlotClicked(this);
 	}
 }
 

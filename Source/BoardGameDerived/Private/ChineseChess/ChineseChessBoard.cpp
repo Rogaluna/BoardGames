@@ -12,16 +12,6 @@ void AChineseChessBoard::OnSlotClicked(UChineseChessBoardSlot* Slot)
     SlotClicked.Broadcast(Slot);
 }
 
-void AChineseChessBoard::OnPlayerEntered(EChineseChessPlayer PlayerCamp, APlayerState* Player)
-{
-    PlayerEntered.Broadcast(PlayerCamp, Player);
-}
-
-void AChineseChessBoard::OnPlayerLeft(EChineseChessPlayer PlayerCamp, APlayerState* Player)
-{
-    PlayerLeft.Broadcast(PlayerCamp, Player);
-}
-
 AChineseChessBoard::AChineseChessBoard()
 {
     bReplicates = true;
@@ -39,8 +29,6 @@ AChineseChessBoard::AChineseChessBoard()
                 NewSlot->SetSlotPos(X, Y);
                 NewSlot->SetupAttachment(RootComponent);
                 NewSlot->PostInitializeComponent();
-
-                NewSlot->OnClicked.AddDynamic(this, &AChineseChessBoard::OnMeshComponentClicked);
 
                 Slots.Add(NewSlot);
             }
@@ -130,23 +118,12 @@ UChineseChessBoardSlot* AChineseChessBoard::GetSlot(const FVector2D& InVec)
     return GetSlot(InVec.X, InVec.Y);
 }
 
-bool AChineseChessBoard::CheckPositionInBoard(const FVector2D& InVec)
-{
-    return InVec.X >= 0 && InVec.X < BoardSize.X
-        && InVec.Y >= 0 && InVec.Y < BoardSize.Y;
-}
-
 void AChineseChessBoard::HandleSlotClicked(UGameBaseBoardSlot* BaseSlot, APlayerState* PlayerState)
 {
-	if (GameManager->IsSeating(PlayerState))
+	if (GameManager->IsEntered(PlayerState))
 	{
 		UChineseChessBoardSlot* Slot = Cast<UChineseChessBoardSlot>(BaseSlot);
 
 		GameManager->ProcessBoardClick(Slot, PlayerState);
 	}
-}
-
-void AChineseChessBoard::OnMeshComponentClicked(UPrimitiveComponent* ClickedComp, FKey ButtonPressed)
-{
-    OnSlotClicked(Cast<UChineseChessBoardSlot>(ClickedComp));
 }

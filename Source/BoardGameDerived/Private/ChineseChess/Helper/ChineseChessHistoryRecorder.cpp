@@ -3,29 +3,44 @@
 
 #include "ChineseChess/Helper/ChineseChessHistoryRecorder.h"
 
-void UChineseChessHistoryRecorder::AddHistoryItem()
+UChineseChessHistoryRecorder::UChineseChessHistoryRecorder()
 {
-	HistoryList.Add(CurrentHistoryItem);
-	CurrentHistoryItem = FChineseChessHistoryItem();
+	
 }
 
-void UChineseChessHistoryRecorder::RemoveLastHistoryItem()
+void UChineseChessHistoryRecorder::Add(TArray<uint8> FeatureMap)
 {
-	HistoryList.Remove(HistoryList.Last());
-	CurrentHistoryItem = FChineseChessHistoryItem();
+	if (StateQueue.Num() == LimitLength)
+	{
+		StateQueue.RemoveAt(0);
+	}
+
+	StateQueue.Emplace(FeatureMap);
 }
 
-const FChineseChessHistoryItem& UChineseChessHistoryRecorder::GetHistoryItem(int32 Index)
+void UChineseChessHistoryRecorder::Remove()
 {
-	return HistoryList[Index];
+	if (StateQueue.IsValidIndex(0))
+	{
+		StateQueue.RemoveAt(0);
+	}
 }
 
-const FChineseChessHistoryItem& UChineseChessHistoryRecorder::GetLastHistoryItem()
+void UChineseChessHistoryRecorder::Clear()
 {
-	return HistoryList.Last();
+	StateQueue.Empty();
 }
 
-int32 UChineseChessHistoryRecorder::GetLength()
+TArray<uint8>& UChineseChessHistoryRecorder::Get(int32 Index)
 {
-	return HistoryList.Num();
+	return StateQueue[Index];
+}
+
+bool UChineseChessHistoryRecorder::IsQueueFull()
+{
+	if (StateQueue.Num() == LimitLength)
+	{
+		return true;
+	}
+	return false;
 }

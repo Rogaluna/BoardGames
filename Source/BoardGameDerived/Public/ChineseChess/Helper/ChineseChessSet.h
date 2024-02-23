@@ -26,7 +26,7 @@ namespace ChineseChessSet
 	};
 
 	/** 初始棋盘状态 */
-	static TArray<FString> InitStatus = {
+	static TArray<FString> InitState = {
 		"Chu_Che",  "Chu_Ma",  "Chu_Xiang", "Chu_Shi", "Chu_Jiang", "Chu_Shi", "Chu_Xiang", "Chu_Ma",  "Chu_Che",
 		"Empty",    "Empty",   "Empty",     "Empty",   "Empty",     "Empty",   "Empty",     "Empty",   "Empty",
 		"Empty",    "Chu_Pao", "Empty",     "Empty",   "Empty",     "Empty",   "Empty",     "Chu_Pao", "Empty",

@@ -9,10 +9,14 @@
 #include "ChineseChess/ChineseChessPawn.h"
 #include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
+#include "HAL/UnrealMemory.h"
 
-AChineseChessManager::AChineseChessManager() 
+AChineseChessManager::AChineseChessManager() :
+	bIsGaming(false)
 {
 	bReplicates = true;
+
+	PlayerContainer.Init(nullptr, 2);
 }
 
 void AChineseChessManager::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -22,169 +26,115 @@ void AChineseChessManager::GetLifetimeReplicatedProps(TArray<class FLifetimeProp
 	DOREPLIFETIME(AChineseChessManager, SelectedPawn);
 	DOREPLIFETIME(AChineseChessManager, PlayerContainer);
 	DOREPLIFETIME(AChineseChessManager, RoundState);
+	DOREPLIFETIME(AChineseChessManager, bIsGaming);
 }
 
-void AChineseChessManager::Multicast_OnPlayerSeated_Implementation(APlayerState* Player, EChineseChessPlayer Type)
+void AChineseChessManager::OnPlayerEntered(EChineseChessPlayer PlayerCamp, APlayerState* Player)
 {
-	AChineseChessBoard* ChineseChessBoard = Cast<AChineseChessBoard>(Board);
-	if (ChineseChessBoard)
+	if (Player)
 	{
-		if (Player->GetPlayerController() == GetWorld()->GetFirstPlayerController())
-		{
-			ChineseChessBoard->OnPlayerSeated(Type);
-		}
+		PlayerContainer[(int)PlayerCamp] = Player;
+
+		PlayerEntered.Broadcast(PlayerCamp, Player);
 	}
 }
 
-void AChineseChessManager::Multicast_OnPlayerLeave_Implementation(APlayerState* Player, EChineseChessPlayer Type)
+void AChineseChessManager::OnPlayerLeft(APlayerState* Player)
 {
-	AChineseChessBoard* ChineseChessBoard = Cast<AChineseChessBoard>(Board);
-	if (ChineseChessBoard)
+	EChineseChessPlayer PlayerCamp;
+	if (GetPlayerCamp(Player, PlayerCamp))
 	{
-		if (Player->GetPlayerController() == GetWorld()->GetFirstPlayerController())
-		{
-			ChineseChessBoard->OnPlayerLeave(Player, Type);
-		}
+		PlayerContainer[(int)PlayerCamp] = nullptr;
+		PlayerLeft.Broadcast(PlayerCamp, Player);
 	}
 }
 
-void AChineseChessManager::SetSelectedPawn(AChineseChessPawn* NewPawn)
+void AChineseChessManager::OnGameAction(EChineseChessGameState GameState, APlayerState* Player)
+{
+	GameAction.Broadcast(GameState, Player);
+}
+
+void AChineseChessManager::SetHistoryRecorder()
+{
+	if (HistoryRecorder)
+	{
+		HistoryRecorder->Clear();
+	}
+	else
+	{
+		HistoryRecorder = NewObject<UChineseChessHistoryRecorder>(this);
+	}
+}
+
+void AChineseChessManager::Select(UChineseChessBoardSlot* NewSlot)
 {
 	if (SelectedPawn)
 	{
-		SelectedPawn->SetStatus(EChineseChessPawnStatus::Idle);
+		SelectedPawn->SetState(EChineseChessPawnState::Idle);
+		NotifySlotsHide();
 	}
 
-	NotifySlotsHide();
-
-	if (NewPawn != nullptr)
+	if (NewSlot)
 	{
-		SelectedPawn = NewPawn;
-		SelectedPawn->SetStatus(EChineseChessPawnStatus::Selected);
-		GetHistoryRecorder()->CurrentHistoryItem.PawnName = SelectedPawn->GetPawnName();
-		GetHistoryRecorder()->CurrentHistoryItem.StartPos = SelectedPawn->GetSlotPos();
+		if (NewSlot->IsOccupied())
+		{
+			SelectedPawn = Cast<AChineseChessPawn>(NewSlot->GetOccupyingPawn());
+			
+			SelectedPawn->SetState(EChineseChessPawnState::Selected);
 
-		// 通知这个棋子能到达的槽位
-		//TArray<FVector2D> ProbablePositions;
-		//SelectedPawn->MoveRule(ProbablePositions);
-		//NotifyMovableSlotsShow(ProbablePositions);
+			// 通知这个棋子能到达的槽位
+			TArray<FVector2D> ProbablePositions;
+			SelectedPawn->MoveRule(GetFeatureMap(), SelectedPawn->GetSlot()->GetSlotPos(), ProbablePositions);
+			NotifyMovableSlotsShow(ProbablePositions);
+			return ;
+		}
+	}
+
+	SelectedPawn = nullptr;
+}
+
+void AChineseChessManager::WaitPlayer(EChineseChessAwaitState& OutAwaitState)
+{
+	const uint8 ReasonA = PlayerContainer[0] ? 0b01 : 0b0;
+	const uint8 ReasonB = PlayerContainer[1] ? 0b10 : 0b0;
+	const uint8 Reasult = ReasonB | ReasonA;
+
+	if ((Reasult ^ 0) == 0b01)
+	{
+		OutAwaitState = EChineseChessAwaitState::Wait_Han;
+	}
+	else if ((Reasult ^ 0) == 0b10)
+	{
+		OutAwaitState = EChineseChessAwaitState::Wait_Chu;
+	}
+	else if ((Reasult ^ 0) == 0b0)
+	{
+		OutAwaitState = EChineseChessAwaitState::Wait_BothSides;
 	}
 	else
 	{
-		SelectedPawn = nullptr;
-	}
-}
-
-UChineseChessHistoryRecorder* AChineseChessManager::GetHistoryRecorder()
-{
-	return HistoryRecorder;
-}
-
-FVector AChineseChessManager::GetSlotLocation(const FVector2D& InVec)
-{
-	return GetSlotLocation(InVec.X, InVec.Y);
-}
-
-FVector AChineseChessManager::GetSlotLocation(int32 X, int32 Y)
-{
-	UChineseChessBoardSlot* Slot = GetSlot(X,	Y);
-	if (Slot)
-	{
-		return Slot->GetComponentLocation();
-	}
-	return FVector::ZeroVector;
-}
-
-UChineseChessBoardSlot* AChineseChessManager::GetSlot(const FVector2D& InVec)
-{
-	return GetSlot(InVec.X, InVec.Y);
-}
-
-UChineseChessBoardSlot* AChineseChessManager::GetSlot(int32 X, int32 Y)
-{
-	return Cast<AChineseChessBoard>(Board)->GetSlot(X, Y);
-}
-
-EChineseChessPlayerSeated AChineseChessManager::GetRemainPlayer()
-{
-	if (Chu && Han)
-	{
-		return EChineseChessPlayerSeated::Filled;
-	}
-	else
-	{
-		if (!Chu && Han)
-		{
-			return EChineseChessPlayerSeated::RemainChu;
-		}
-		else if (!Han && Chu)
-		{
-			return EChineseChessPlayerSeated::RemainHan;
-		}
-		return EChineseChessPlayerSeated::RemainBothSide;
-	}
-}
-
-void AChineseChessManager::PlayerSeated(EChineseChessPlayer PlayerCamp, APlayerState* NewPlayer)
-{
-	if (NewPlayer)
-	{
-		switch (PlayerCamp)
-		{
-		case EChineseChessPlayer::Chu:
-			Chu = NewPlayer;
-			break;
-		case EChineseChessPlayer::Han:
-			Han = NewPlayer;
-			break;
-		default:
-			break;
-		}
-
-		Multicast_OnPlayerSeated(NewPlayer, PlayerCamp);
-
-		OnPlayerSeated(PlayerCamp);
-	}
-}
-
-void AChineseChessManager::PlayerLeave(APlayerState* Player)
-{
-	if (IsSeating(Player))
-	{
-		if (Player == Chu)
-		{
-			Chu = nullptr;
-			OnPlayerLeave(Player, EChineseChessPlayer::Chu);
-			Multicast_OnPlayerLeave(Player, EChineseChessPlayer::Chu);
-		}
-		else
-		{
-			Han = nullptr;
-			OnPlayerLeave(Player, EChineseChessPlayer::Han);
-			Multicast_OnPlayerLeave(Player, EChineseChessPlayer::Han);
-		}
+		OutAwaitState = EChineseChessAwaitState::Ready;
 	}
 }
 
 APlayerState* AChineseChessManager::GetPlayer(EChineseChessPlayer PlayerCamp)
 {
-	switch (PlayerCamp)
+	const int32 Index = (int32)PlayerCamp;
+	if (Index == 0 || Index == 1)
 	{
-	case EChineseChessPlayer::Chu:
-		return Chu;
-	case EChineseChessPlayer::Han:
-		return Han;
-	default:
-		break;
+		return PlayerContainer[Index];
 	}
-	return nullptr;
+	else
+	{
+		return nullptr;
+	}
 }
 
 bool AChineseChessManager::GetPlayerCamp(APlayerState* PlayerState, EChineseChessPlayer& PlayerCamp)
 {
-	if (IsSeating(PlayerState))
+	if (IsEntered(PlayerState))
 	{
-		if (PlayerState == Chu)
+		if (PlayerState == GetPlayer(EChineseChessPlayer::Chu))
 		{
 			PlayerCamp = EChineseChessPlayer::Chu;
 		}
@@ -197,22 +147,9 @@ bool AChineseChessManager::GetPlayerCamp(APlayerState* PlayerState, EChineseChes
 	return false;
 }
 
-bool AChineseChessManager::IsPlayerCamp(APlayerState* InPlayerState, EChineseChessPlayer& InPlayerCamp)
+bool AChineseChessManager::IsEntered(APlayerState* PlayerState)
 {
-	EChineseChessPlayer PlayerCamp;
-	if (GetPlayerCamp(InPlayerState, PlayerCamp))
-	{
-		if (PlayerCamp == InPlayerCamp)
-		{
-			return true;
-		}
-	}
-	return false;
-}
-
-bool AChineseChessManager::IsSeating(APlayerState* PlayerState)
-{
-	if (PlayerState == Han || PlayerState == Chu)
+	if (PlayerContainer.Contains(PlayerState))
 	{
 		return true;
 	}
@@ -227,58 +164,93 @@ void AChineseChessManager::ProcessBoardClick(UChineseChessBoardSlot* Slot, APlay
 		return;
 	}
 
-	const bool bOccupied = Slot->IsOccupied();
-	const FVector2D SlotPos = Slot->GetSlotPos();
-	AChineseChessPawn* OccupiedPawn = nullptr;
-	if (bOccupied)
-	{
-		OccupiedPawn = Cast<AChineseChessPawn>(Slot->GetOccupyingPawn());
-	}
-
 	// 如果没有SelectedPawn，并且没有点击到Pawn，什么也不用做
 	// 如果没有SelectedPawn，并且点击到Pawn，设置它
 	// 如果有SelectedPawn，获取它可以合法到达的位置，与点击位置比较，不在其中，且此位置上有己方棋子，切换SelectedPawn为该棋子
 	// 如果有SelectedPawn，获取它可以合法到达的位置，与点击位置比较，不在其中，且此位置没有棋子或敌方棋子，切换SelectedPawn为空
 	// 如果有SelectedPawn，获取它可以合法到达的位置，与点击位置比较，是可以到达的位置，将棋子移动到目标位置。
 
+	const FVector2D SlotPos = Slot->GetSlotPos();
+	const bool bOccupied = Slot->IsOccupied();
+	AChineseChessPawn* OccupiedPawn = nullptr;
+	if (bOccupied)
+	{
+		OccupiedPawn = Cast<AChineseChessPawn>(Slot->GetOccupyingPawn());
+	}
+
 	if (SelectedPawn)
 	{
+		const FVector2D SelectedPawnPos = SelectedPawn->GetSlot()->GetSlotPos();
 		TArray<FVector2D> ProbablePositions;
-		//SelectedPawn->MoveRule(ProbablePositions);
+		SelectedPawn->MoveRule(GetFeatureMap(), SelectedPawnPos, ProbablePositions);
 
 		if (ProbablePositions.Contains(SlotPos))
 		{
-			// 检查点击位置是否在可移动位置列表中
+			// 检查棋子移动后的位置是否合法
+			EChineseChessPlayer PlayerCamp;
+			GetPlayerCamp(PlayerState, PlayerCamp);
+			bool bUnlawful = IsIllegal(
+				GetFeatureMapWithParam(SelectedPawnPos, SlotPos),
+				PlayerCamp);
 
-			// 移动棋子到新位置
-			SelectedPawn->MovePawn(SlotPos);
-			RoundSwitch();
+			if (bUnlawful)
+			{
+				// 非法移动
+				OnGameAction(EChineseChessGameState::IllegalMove, PlayerState);
+			}
+			else
+			{
+				// 合法移动
+				SelectedPawn->MovePawn(Cast<AChineseChessBoard>(Board)->GetSlot(SlotPos));
+				TArray<uint8> Map = GetFeatureMap();
 
-			SetSelectedPawn(nullptr); // 清除选中的棋子
+				HistoryRecorder->Add(Map);
+
+				if (Check(Map, PlayerCamp))
+				{
+					OnGameAction(EChineseChessGameState::Check, PlayerState);
+
+					if (CheckMate(Map, PlayerCamp))
+					{
+						OnGameAction(EChineseChessGameState::CheckMate, PlayerState);
+
+						RoundState = EChineseChessRoundState::None;
+						Select(nullptr);
+
+						OnGameAction(EChineseChessGameState::GameOver, nullptr);
+
+						return;
+					}
+				}
+				RoundSwitch();
+			}
+
+			Select(nullptr); // 清除选中的棋子
 		}
 		else
 		{
 			// 点击位置不在可移动列表中
-			if (bOccupied && OccupiedPawn != SelectedPawn && OccupiedPawn->GetCamp() == SelectedPawn->GetCamp())
+			if (bOccupied && OccupiedPawn != SelectedPawn && 
+				(ChineseChessSet::Encode(OccupiedPawn->GetPawnType()) >> 3) == (ChineseChessSet::Encode(SelectedPawn->GetPawnType()) >> 3))
 			{
 				// 点击了另一个己方棋子，切换选中的棋子
 				
 				// 如果这个棋子不是己方阵营的，啥也不做
-				const EChineseChessCamp PlayerCamp = (RoundState == EChineseChessRoundState::RoundChu ? EChineseChessCamp::Chu : EChineseChessCamp::Han);
-				if (OccupiedPawn->GetCamp() != PlayerCamp)
+				const uint32 PlayerCamp = (uint32)RoundState;
+				if ((ChineseChessSet::Encode(OccupiedPawn->GetPawnType()) >> 3) != PlayerCamp)
 				{
 					UE_LOG(LogTemp, Log, L"选中的棋子并非可控");
 					return;
 				}
 				else
 				{
-					SetSelectedPawn(OccupiedPawn);
+					Select(Slot);
 				}
 			}
 			else
 			{
 				// 点击位置没有棋子，或者是敌方棋子，取消选中
-				SetSelectedPawn(nullptr);
+				Select(nullptr);
 			}
 		}
 	}
@@ -289,15 +261,15 @@ void AChineseChessManager::ProcessBoardClick(UChineseChessBoardSlot* Slot, APlay
 			// 没有选中的棋子，点击到了一个棋子，选中它
 
 			// 如果这个棋子不是己方阵营的，啥也不做
-			const EChineseChessCamp PlayerCamp = (RoundState == EChineseChessRoundState::RoundChu ? EChineseChessCamp::Chu : EChineseChessCamp::Han);
-			if (OccupiedPawn->GetCamp() != PlayerCamp)
+			const uint32 PlayerCamp = (uint32)RoundState;
+			if ((ChineseChessSet::Encode(OccupiedPawn->GetPawnType()) >> 3) != PlayerCamp)
 			{
 				UE_LOG(LogTemp, Log, L"选中的棋子并非可控");
 				return;
 			}
 			else
 			{
-				SetSelectedPawn(OccupiedPawn);
+				Select(Slot);
 			}
 		}
 		else
@@ -309,32 +281,43 @@ void AChineseChessManager::ProcessBoardClick(UChineseChessBoardSlot* Slot, APlay
 
 void AChineseChessManager::GameStart()
 {
-	EChineseChessPlayerSeated SeatedState = GetRemainPlayer();
-	switch (SeatedState)
+	EChineseChessAwaitState AwaitState;
+	WaitPlayer(AwaitState);
+	switch (AwaitState)
 	{
-	case EChineseChessPlayerSeated::Filled:
+	case EChineseChessAwaitState::Wait_Chu:
+		break;
+	case EChineseChessAwaitState::Wait_Han:
+		break;
+	case EChineseChessAwaitState::Wait_BothSides:
+		break;
+	case EChineseChessAwaitState::Ready:
+	{
+		AChineseChessBoard* ChineseBoard = Cast<AChineseChessBoard>(Board);
+		for (int32 i = 0, PawnIt = 0; i < BOARDSIZE_X * BOARDSIZE_Y; i++)
+		{
+			const FString& PawnClassName = ChineseChessSet::InitState[i];
+			if (PawnClassName == "Empty")
+			{
+				continue;
+			}
+
+			int32 X = i % BOARDSIZE_X;
+			int32 Y = i / BOARDSIZE_X;
+
+			PawnArray[PawnIt]->MovePawn(ChineseBoard->GetSlot(X, Y));
+			PawnIt++;
+		}
+
 		RoundState = EChineseChessRoundState::RoundHan;
-		HistoryRecorder = NewObject<UChineseChessHistoryRecorder>(this);
-		UE_LOG(LogTemp, Log, L"游戏开始了");
-		break;
-	case EChineseChessPlayerSeated::RemainBothSide:
-		break;
-	case EChineseChessPlayerSeated::RemainChu:
-		UE_LOG(LogTemp, Log, L"等待楚军入座");
-		break;
-	case EChineseChessPlayerSeated::RemainHan:
-		UE_LOG(LogTemp, Log, L"等待汉军入座");
+		bIsGaming = true;
+		SetHistoryRecorder();
+		OnGameAction(EChineseChessGameState::GameStart, nullptr);
+	}
 		break;
 	default:
 		break;
 	}
-
-	OnGameStart(SeatedState);
-}
-
-void AChineseChessManager::Restart()
-{
-	InitializePawns();
 }
 
 void AChineseChessManager::Withdraw()
@@ -344,27 +327,24 @@ void AChineseChessManager::Withdraw()
 
 void AChineseChessManager::GiveUp(APlayerState* Player)
 {
-	if (HasAuthority())
+	if (GetIsGameing())
 	{
-		if (IsSeating(Player))
+		EChineseChessPlayer PlayerCamp;
+		if (GetPlayerCamp(Player, PlayerCamp))
 		{
-			if (Player == Chu)
-			{
-				OnGiveUp(EChineseChessPlayer::Chu);
-			}
-			else
-			{
-				OnGiveUp(EChineseChessPlayer::Han);
-			}
-			
-			OnGameOver();
+			OnGameAction(EChineseChessGameState::GiveUp, Player);
+
+			RoundState = EChineseChessRoundState::None;
+			Select(nullptr);
+
+			OnGameAction(EChineseChessGameState::GameOver, nullptr);
 		}
 	}
 }
 
 void AChineseChessManager::SwitchCamp(APlayerState* Player, EChineseChessPlayer TargetCamp)
 {
-	EChineseChessPlayer PlayerCamp = EChineseChessPlayer::Chu;
+	EChineseChessPlayer PlayerCamp;
 	if (!GetPlayerCamp(Player, PlayerCamp))
 	{
 		return;
@@ -375,58 +355,30 @@ void AChineseChessManager::SwitchCamp(APlayerState* Player, EChineseChessPlayer 
 		return;
 	}
 
-	if (Player == Chu)
+	PlayerContainer.Swap(0, 1);
+	OnGameAction(EChineseChessGameState::CampSwitch, Player);
+}
+
+bool AChineseChessManager::IsIllegal(TArray<uint8> FeatureMap, EChineseChessPlayer PlayerCamp)
+{
+	// 是否造成了己方将军
+	if (Check(FeatureMap, (PlayerCamp == EChineseChessPlayer::Chu ? EChineseChessPlayer::Han : EChineseChessPlayer::Chu)))
 	{
-		APlayerState* TempPlayer = Han;
-		Han = Player;
-		Chu = TempPlayer;
-	}
-	else
-	{
-		APlayerState* TempPlayer = Chu;
-		Chu = Player;
-		Han = TempPlayer;
+		return true;
 	}
 
-	OnSwitchCamp(Player);
+	// 长将判定
+	if (HistoryRecorder->IsQueueFull() &&
+		CompareFeatureMap(FeatureMap, HistoryRecorder->Get(0)))
+	{
+		return true;
+	}
+
+	return false;
 }
 
 void AChineseChessManager::RoundSwitch()
 {
-	if (HasAuthority())
-	{
-		EChineseChessCheckState CheckResult = Check(true);
-		switch (CheckResult)
-		{
-		case EChineseChessCheckState::Illegal:
-		{
-			RevokeOperate(0);
-			OnIllegal(RoundState);
-			return;
-		}
-			break;
-		case EChineseChessCheckState::Check:
-		{
-			GetHistoryRecorder()->CurrentHistoryItem.isChecker = true;
-			OnCheck(RoundState);
-		}
-			break;
-		case EChineseChessCheckState::CheckMate:
-		{
-			GetHistoryRecorder()->CurrentHistoryItem.isChecker = true;
-			OnCheckMate(RoundState);
-			GetHistoryRecorder()->AddHistoryItem();
-			OnGameOver();
-			return;
-		}
-		break;
-		default:
-			break;
-		}
-
-		GetHistoryRecorder()->AddHistoryItem();
-	}
-
 	switch (RoundState)
 	{
 	case EChineseChessRoundState::RoundChu:
@@ -439,30 +391,29 @@ void AChineseChessManager::RoundSwitch()
 		break;
 	}
 
-	OnRoundSwitch(RoundState);
+	OnGameAction(EChineseChessGameState::RoundSwitch, nullptr);
 }
 
 bool AChineseChessManager::IsRound(APlayerState* PlayerState)
 {
-	if (IsSeating(PlayerState))
+	EChineseChessPlayer PlayerCamp;
+	GetPlayerCamp(PlayerState, PlayerCamp);
+	if ((uint32)RoundState == (uint32)PlayerCamp)
 	{
-		if (PlayerState == Chu && RoundState == EChineseChessRoundState::RoundChu)
-		{
-			return true;
-		}
-		
-		if (PlayerState == Han && RoundState == EChineseChessRoundState::RoundHan)
-		{
-			return true;
-		}
+		return true;
 	}
 	return false;
 }
 
-bool AChineseChessManager::IsKingFaceToFace()
+bool AChineseChessManager::IsKingFaceToFace(TArray<uint8> FeatureMap)
 {
-	const FVector2D JiangPos = (*PawnMap_Chu.Find(L"Pawn_Chu_Jiang"))->GetSlotPos();
-	const FVector2D ShuaiPos = (*PawnMap_Han.Find(L"Pawn_Han_Shuai"))->GetSlotPos();
+	int32 JiangIndex;
+	FeatureMap.Find(ChineseChessSet::Encode("Chu_Jiang"), JiangIndex);
+	int32 ShuaiIndex;
+	FeatureMap.Find(ChineseChessSet::Encode("Han_Shuai"), ShuaiIndex);
+
+	const FVector2D JiangPos = FVector2D(JiangIndex % BOARDSIZE_X, JiangIndex / BOARDSIZE_X);
+	const FVector2D ShuaiPos = FVector2D(ShuaiIndex % BOARDSIZE_X, ShuaiIndex / BOARDSIZE_X);
 
 	if (ShuaiPos.X == JiangPos.X)
 	{
@@ -470,7 +421,7 @@ bool AChineseChessManager::IsKingFaceToFace()
 		do 
 		{
 			CheckPos.Y += 1;
-			if (GetSlot(CheckPos)->IsOccupied())
+			if (Cast<AChineseChessBoard>(Board)->GetSlot(CheckPos)->IsOccupied())
 			{
 				return false;
 			}
@@ -484,195 +435,89 @@ bool AChineseChessManager::IsKingFaceToFace()
 	}
 }
 
-EChineseChessCheckState AChineseChessManager::Check(bool bCheckMate)
+bool AChineseChessManager::Check(TArray<uint8> FeatureMap, EChineseChessPlayer PlayerCamp)
 {
-	const FVector2D JiangPos = (*PawnMap_Chu.Find(L"Pawn_Chu_Jiang"))->GetSlotPos();
-	const FVector2D ShuaiPos = (*PawnMap_Han.Find(L"Pawn_Han_Shuai"))->GetSlotPos();
+	int32 JiangIndex;
+	FeatureMap.Find(ChineseChessSet::Encode("Chu_Jiang"), JiangIndex);
+	int32 ShuaiIndex;
+	FeatureMap.Find(ChineseChessSet::Encode("Han_Shuai"), ShuaiIndex);
 
-	// 检查所有场上是否有棋子将军
-	TArray<FVector2D> AttackPositions_Chu;
-	TArray<FVector2D> AttackPositions_Han;
+	const FVector2D JiangPos = FVector2D(JiangIndex % BOARDSIZE_X, JiangIndex / BOARDSIZE_X);
+	const FVector2D ShuaiPos = FVector2D(ShuaiIndex % BOARDSIZE_X, ShuaiIndex / BOARDSIZE_X);
 
-	for (const TPair<FString, AChineseChessPawn*>& Pair : PawnMap_Chu)
+	const FVector2D& CheckPos = PlayerCamp == EChineseChessPlayer::Chu ? ShuaiPos : JiangPos;
+
+	// 判定是否王对王
+	if (IsKingFaceToFace(FeatureMap))
 	{
-		FString Key = Pair.Key;
-		AChineseChessPawn* Pawn = Pair.Value;
+		return true;
+	}
 
-		// 将可受到攻击的位置保存在AttackPositions中
-		if (Pawn && Pawn->IsAlive())
+	// 判定是否将军
+	for (int32 i = 0; i < FeatureMap.Num(); ++i)
+	{
+		const int32 X = i % BOARDSIZE_X;
+		const int32 Y = i / BOARDSIZE_Y;
+
+		const FVector2D Pos = FVector2D(X, Y);
+		UChineseChessBoardSlot* Slot = Cast<AChineseChessBoard>(Board)->GetSlot(Pos);
+		AChineseChessPawn* Pawn = Cast<AChineseChessPawn>(Slot->GetOccupyingPawn());
+
+		if (Pawn)
 		{
 			TArray<FVector2D> ProbablePositions;
-			//Pawn->MoveRule(ProbablePositions);
+			Pawn->MoveRule(FeatureMap, Pos, ProbablePositions);
 
-			for (const FVector2D& ProbablePos : ProbablePositions)
+			if (ProbablePositions.Contains(CheckPos))
 			{
-				AttackPositions_Chu.AddUnique(ProbablePos);
+				return true;
 			}
 		}
 	}
 
-	for (const TPair<FString, AChineseChessPawn*>& Pair : PawnMap_Han)
-	{
-		FString Key = Pair.Key;
-		AChineseChessPawn* Pawn = Pair.Value;
-
-		// 将可受到攻击的位置保存在AttackPositions中
-		if (Pawn && Pawn->IsAlive())
-		{
-			TArray<FVector2D> ProbablePositions;
-			//Pawn->MoveRule(ProbablePositions);
-
-			for (const FVector2D& ProbablePos : ProbablePositions)
-			{
-				AttackPositions_Han.AddUnique(ProbablePos);
-			}
-		}
-	}
-
-	// 检查是否被将军
-	// 如果在己方回合内己方被将军，撤回操作
-	// 如果在己方回合内敌方被将军，检查是否将死
-	if (IsKingFaceToFace())
-	{
-		return EChineseChessCheckState::Illegal;
-	}
-	
-	switch (RoundState)
-	{
-	case EChineseChessRoundState::None:
-		break;
-	case EChineseChessRoundState::RoundChu:
-		if (AttackPositions_Han.Contains(JiangPos))
-		{
-			// 撤回操作
-			return EChineseChessCheckState::Illegal;
-		}
-		else
-		{
-			if (AttackPositions_Chu.Contains(ShuaiPos))
-			{
-				// 检查是否被将死
-				if (bCheckMate && CheckMate(PawnMap_Han, ShuaiPos, PawnMap_Chu))
-				{
-					return EChineseChessCheckState::CheckMate;
-				}
-				return EChineseChessCheckState::Check;
-			}
-		}
-		break;
-	case EChineseChessRoundState::RoundHan:
-		if (AttackPositions_Chu.Contains(ShuaiPos))
-		{
-			// 撤回操作
-			return EChineseChessCheckState::Illegal;
-		}
-		else
-		{
-			if (AttackPositions_Han.Contains(JiangPos))
-			{
-				// 检查是否被将死
-				if (bCheckMate && CheckMate(PawnMap_Chu, JiangPos, PawnMap_Han))
-				{
-					return EChineseChessCheckState::CheckMate;
-				}
-				return EChineseChessCheckState::Check;
-			}
-		}
-		break;
-	default:
-		break;
-	}
-	return EChineseChessCheckState::None;
+	return false;
 }
 
-bool AChineseChessManager::CheckMate(const TMap<FString, AChineseChessPawn*>& DefensePawnMap, const FVector2D& DefenseKingPos, const TMap<FString, AChineseChessPawn*>& AttackPawnMap)
+bool AChineseChessManager::CheckMate(TArray<uint8> FeatureMap, EChineseChessPlayer PlayerCamp)
 {
-	FChineseChessHistoryItem SavedItem = GetHistoryRecorder()->CurrentHistoryItem;
-	GetHistoryRecorder()->CurrentHistoryItem = FChineseChessHistoryItem();
-	RoundState = (RoundState == EChineseChessRoundState::RoundChu) ? EChineseChessRoundState::RoundHan : EChineseChessRoundState::RoundChu;
+	EChineseChessPlayer DefCamp = (EChineseChessPlayer)((uint8)PlayerCamp ^ 0b1);
 
-	for (const TPair<FString, AChineseChessPawn*>& DefensePair : DefensePawnMap)
+	for (int32 i = 0; i < FeatureMap.Num(); ++i)
 	{
-		FString DefenseKey = DefensePair.Key;
-		AChineseChessPawn* DefensePawn = DefensePair.Value;
+		const int32 X = i % BOARDSIZE_X;
+		const int32 Y = i / BOARDSIZE_Y;
 
-		if (DefensePawn && DefensePawn->IsAlive())
+		const FVector2D Pos = FVector2D(X, Y);
+		UChineseChessBoardSlot* Slot = Cast<AChineseChessBoard>(Board)->GetSlot(Pos);
+		AChineseChessPawn* Pawn = Cast<AChineseChessPawn>(Slot->GetOccupyingPawn());
+
+		if (Pawn)
 		{
-			// 该棋子尝试解将
-			TArray<FVector2D> ProbableDefensePositions;
-			//DefensePawn->MoveRule(ProbableDefensePositions);
-			for (const FVector2D& ProbableDefensePos : ProbableDefensePositions)
+			const FVector2D StartPos = Slot->GetSlotPos();
+
+			if ((ChineseChessSet::Encode(Pawn->GetPawnType()) >> 3) == (uint8)DefCamp)
 			{
-				GetHistoryRecorder()->CurrentHistoryItem.PawnName = DefensePawn->GetPawnName();
-				GetHistoryRecorder()->CurrentHistoryItem.StartPos = DefensePawn->GetSlotPos();
-				DefensePawn->MovePawn(ProbableDefensePos);
+				TArray<FVector2D> ProbablePositions;
+				Pawn->MoveRule(FeatureMap, Pos, ProbablePositions);
 
-				// 检查是否还在将军
-				EChineseChessCheckState IsStillCheck = Check();
-
-				FChineseChessHistoryItem Temporary = GetHistoryRecorder()->CurrentHistoryItem;
-				DefensePawn->MovePawn(Temporary.StartPos);
-				if (Temporary.isKiller)
+				for (const FVector2D& EndPos : ProbablePositions)
 				{
-					AChineseChessPawn* DeadPawn = (*AttackPawnMap.Find(Temporary.KilledName));
-					DeadPawn->Resume();
-					DeadPawn->SetupSlot(GetSlot(Temporary.EndPos));
-				}
-
-				if (IsStillCheck != EChineseChessCheckState::Illegal)
-				{
-					GetHistoryRecorder()->CurrentHistoryItem = SavedItem;
-					RoundState = (RoundState == EChineseChessRoundState::RoundChu) ? EChineseChessRoundState::RoundHan : EChineseChessRoundState::RoundChu;
-					return false;
+					TArray<uint8> DefMap = GetFeatureMapWithParam(StartPos, EndPos, &FeatureMap); 
+					if (!IsIllegal(DefMap, DefCamp))
+					{
+						return false;
+					}
 				}
 			}
 		}
 	}
-	// 无力回天，被将死了
-	GetHistoryRecorder()->CurrentHistoryItem = SavedItem;
-	RoundState = (RoundState == EChineseChessRoundState::RoundChu) ? EChineseChessRoundState::RoundHan : EChineseChessRoundState::RoundChu;
+
 	return true;
 }
 
 void AChineseChessManager::RevokeOperate(int32 Num)
 {
-	if (Num == 0)
-	{
-		const FChineseChessHistoryItem& Item = GetHistoryRecorder()->CurrentHistoryItem;
-		int32 Length = GetHistoryRecorder()->GetLength();
-		const TMap<FString, AChineseChessPawn*>& ActivePawnMap = (Length % 2) ? PawnMap_Chu : PawnMap_Han;
-		const TMap<FString, AChineseChessPawn*>& PassivePawnMap = (Length % 2) ? PawnMap_Han: PawnMap_Chu;
-		AChineseChessPawn* RevokedPawn = (*ActivePawnMap.Find(Item.PawnName));
-		RevokedPawn->MovePawn(Item.StartPos);
-		if (Item.isKiller)
-		{
-			AChineseChessPawn* DeadPawn = (*PassivePawnMap.Find(Item.KilledName));
-			DeadPawn->Resume();
-			DeadPawn->SetupSlot(GetSlot(Item.EndPos));
-		}
-
-		GetHistoryRecorder()->CurrentHistoryItem = FChineseChessHistoryItem();
-	}
-	else if (Num <= GetHistoryRecorder()->GetLength())
-	{
-		for (; Num > 0; Num--)
-		{
-			const FChineseChessHistoryItem& Item = GetHistoryRecorder()->GetLastHistoryItem();
-			int32 Length = GetHistoryRecorder()->GetLength(); 
-			const TMap<FString, AChineseChessPawn*>& ActivePawnMap = (Length % 2) ? PawnMap_Han : PawnMap_Chu;
-			const TMap<FString, AChineseChessPawn*>& PassivePawnMap = (Length % 2) ? PawnMap_Chu : PawnMap_Han;
-			AChineseChessPawn* RevokedPawn = (*ActivePawnMap.Find(Item.PawnName));
-			RevokedPawn->MovePawn(Item.StartPos);
-			if (Item.isKiller)
-			{
-				AChineseChessPawn* DeadPawn = (*PassivePawnMap.Find(Item.KilledName));
-				DeadPawn->Resume();
-				DeadPawn->SetupSlot(GetSlot(Item.EndPos));
-			}
-
-			GetHistoryRecorder()->RemoveLastHistoryItem();
-		}
-	}
+	
 }
 
 void AChineseChessManager::RegisterPawn(UWorld* World, TSubclassOf<AChineseChessPawn> PawnClass, const FString& PawnClassName, const FVector2D& Slot, FActorSpawnParameters SpawnParams)
@@ -682,7 +527,7 @@ void AChineseChessManager::RegisterPawn(UWorld* World, TSubclassOf<AChineseChess
 	{
 		// 对棋子进行一些设置
 		PawnPtr->Initialize(PawnClassName, this);
-		PawnPtr->SetupSlot(GetSlot(Slot));
+		PawnPtr->SetupSlot(Cast<AChineseChessBoard>(Board)->GetSlot(Slot));
 
 		PawnArray.Emplace(PawnPtr);
 	}
@@ -692,11 +537,11 @@ AChineseChessPawn* AChineseChessManager::GeneratePawn(UWorld* World, TSubclassOf
 {
 	// 获取棋盘的缩放
 	const FVector SpawnScale = Board->GetActorScale3D();
-	
+	const FRotator SpawnRotator = Board->GetActorRotation();
 	const FVector SpawnLoca = Cast<AChineseChessBoard>(GetBoard())->GetSlot(Slot)->GetComponentLocation();
 
 	// 生成棋子使用的变换
-	const FTransform SpawnTransform = FTransform(FRotator::ZeroRotator, SpawnLoca, SpawnScale);
+	const FTransform SpawnTransform = FTransform(SpawnRotator, SpawnLoca, SpawnScale);
 
 	return World->SpawnActor<AChineseChessPawn>(PawnClass, SpawnTransform, SpawnParams);
 }
@@ -711,7 +556,7 @@ void AChineseChessManager::InitializePawns()
 
 		for (int32 i = 0; i < BOARDSIZE_X * BOARDSIZE_Y; i++)
 		{
-			const FString& PawnClassName = ChineseChessSet::InitStatus[i];
+			const FString& PawnClassName = ChineseChessSet::InitState[i];
 			if (PawnClassName == "Empty") // 还是稍微优化下罢
 			{
 				continue;
@@ -720,20 +565,17 @@ void AChineseChessManager::InitializePawns()
 			const FString ReflexName = "PawnClass_" + PawnClassName;
 
 			int32 X = i % BOARDSIZE_X;
-			int32 Y = i / BOARDSIZE_Y;
+			int32 Y = i / BOARDSIZE_X;
 
-			FProperty* Property = FindField<FProperty>(GameSet->GetClass(), *ReflexName);
+			FProperty* Property = FindFProperty<FProperty>(GameSet->GetClass(), *ReflexName);
 			if (Property)
 			{
-				if (Property->IsA<TSubclassOf<AChineseChessPawn>>())
+				TSubclassOf<AChineseChessPawn>* PawnClassPtr = Property->ContainerPtrToValuePtr<TSubclassOf<AChineseChessPawn>>(GameSet);
+				if (PawnClassPtr)
 				{
-					TSubclassOf<AChineseChessPawn>* PawnClassPtr = Property->ContainerPtrToValuePtr<TSubclassOf<AChineseChessPawn>>(GameSet);
-					if (PawnClassPtr)
-					{
-						// 找到属性，并且属性类型匹配
-						TSubclassOf<AChineseChessPawn> PawnClass = *PawnClassPtr;
-						RegisterPawn(World, PawnClass, PawnClassName, FVector2D(X, Y), SpawnParams);
-					}
+					// 找到属性，并且属性类型匹配
+					TSubclassOf<AChineseChessPawn> PawnClass = *PawnClassPtr;
+					RegisterPawn(World, PawnClass, PawnClassName, FVector2D(X, Y), SpawnParams);
 				}
 			}
 		}
@@ -778,4 +620,105 @@ TArray<uint8> AChineseChessManager::GetFeatureMap()
 	}
 
 	return FeatureMap;
+}
+
+TArray<uint8> AChineseChessManager::GetFeatureMapWithParam(const FVector2D& Start, const FVector2D& End, TArray<uint8>* OriMap)
+{
+	uint8 mStart = 0b00000000;
+	mStart |= (uint8)Start.X;
+	mStart <<= 4;
+	mStart |= (uint8)Start.Y;
+	uint8 mEnd = 0b00000000;
+	mEnd |= (uint8)End.X;
+	mEnd <<= 4;
+	mEnd |= (uint8)End.Y;
+
+	TArray<uint8> FeatureMap;
+	FeatureMap.Init(0b0, BOARDSIZE_X * BOARDSIZE_Y);
+
+	if (!OriMap)
+	{
+		uint8 Pixel = 0;
+
+		const UChineseChessBoardSlot* ReplacedSlot = Cast<AChineseChessBoard>(GetBoard())->GetSlot(Start);
+		const AChineseChessPawn* ReplacedPawn = Cast<AChineseChessPawn>(ReplacedSlot->GetOccupyingPawn());
+		
+		check(ReplacedPawn);
+
+		for (UChineseChessBoardSlot*& Slot : Cast<AChineseChessBoard>(GetBoard())->GetSlots())
+		{
+			const FVector2D& Pos = Slot->GetSlotPos();
+			uint8 mPos = 0b00000000;
+			mPos |= (uint8)Pos.X;
+			mPos <<= 4;
+			mPos |= (uint8)Pos.Y;
+
+			if (mPos == mStart)
+			{
+				Pixel = ChineseChessSet::GetEmptyCode();
+				FeatureMap[Pos.X + Pos.Y * BOARDSIZE_X] = Pixel;
+				continue;
+			}
+			if (mPos == mEnd)
+			{
+				Pixel = ChineseChessSet::Encode(ReplacedPawn->GetPawnType());
+				FeatureMap[Pos.X + Pos.Y * BOARDSIZE_X] = Pixel;
+				continue;
+			}
+
+			AGameBasePawn* BasePawn = Slot->GetOccupyingPawn();
+			if (BasePawn)
+			{
+				AChineseChessPawn* ChineseChessPawn = Cast<AChineseChessPawn>(BasePawn);
+				Pixel = ChineseChessSet::Encode(ChineseChessPawn->GetPawnType());
+			}
+			else
+			{
+				Pixel = ChineseChessSet::GetEmptyCode();
+			}
+
+			FeatureMap[Pos.X + Pos.Y * BOARDSIZE_X] = Pixel;
+		}
+	}
+	else
+	{
+		const TArray<uint8>& mOriMap = *OriMap;
+		uint8 ReplacePixel = mOriMap[Start.X + Start.Y * BOARDSIZE_X];
+
+		for (int32 i = 0; i < mOriMap.Num(); ++i)
+		{
+			int32 X = i % BOARDSIZE_X;
+			int32 Y = i / BOARDSIZE_Y;
+
+			const FVector2D Pos = FVector2D(X, Y);
+			uint8 mPos = 0b00000000;
+			mPos |= (uint8)Pos.X;
+			mPos <<= 4;
+			mPos |= (uint8)Pos.Y;
+
+			if (mPos == mStart)
+			{
+				FeatureMap[i] = ChineseChessSet::GetEmptyCode();
+				continue;
+			}
+			if (mPos == mEnd)
+			{
+				FeatureMap[i] = ReplacePixel;
+				continue;
+			}
+
+			FeatureMap[i] = mOriMap[i];
+		}
+	}
+
+	return FeatureMap;
+}
+
+bool AChineseChessManager::CompareFeatureMap(TArray<uint8> SoureFeatureMap, TArray<uint8> TargetFeatureMap)
+{
+	if (FGenericPlatformMemory::Memcmp(SoureFeatureMap.GetData(), TargetFeatureMap.GetData(), SoureFeatureMap.Num()) == 0)
+	{
+		return true;
+	}
+	return false;
 }

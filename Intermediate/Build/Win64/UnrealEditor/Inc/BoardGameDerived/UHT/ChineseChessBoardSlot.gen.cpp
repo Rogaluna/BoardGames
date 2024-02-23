@@ -6,6 +6,7 @@
 
 #include "UObject/GeneratedCppIncludes.h"
 #include "BoardGameDerived/Public/ChineseChess/ChineseChessBoardSlot.h"
+#include "InputCoreTypes.h"
 PRAGMA_DISABLE_DEPRECATION_WARNINGS
 void EmptyLinkFunctionForGeneratedCodeChineseChessBoardSlot() {}
 // Cross Module References
@@ -14,6 +15,8 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessBoardSlot() {}
 	BOARDGAMEDERIVED_API UEnum* Z_Construct_UEnum_BoardGameDerived_EHeightLightType();
 	BOARDGAMES_API UClass* Z_Construct_UClass_UGameBaseBoardSlot();
 	COREUOBJECT_API UScriptStruct* Z_Construct_UScriptStruct_FVector2D();
+	ENGINE_API UClass* Z_Construct_UClass_UPrimitiveComponent_NoRegister();
+	INPUTCORE_API UScriptStruct* Z_Construct_UScriptStruct_FKey();
 	NIAGARA_API UClass* Z_Construct_UClass_UNiagaraComponent_NoRegister();
 	NIAGARA_API UClass* Z_Construct_UClass_UNiagaraSystem_NoRegister();
 	UPackage* Z_Construct_UPackage__Script_BoardGameDerived();
@@ -82,6 +85,15 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessBoardSlot() {}
 		}
 		return Z_Registration_Info_UEnum_EHeightLightType.InnerSingleton;
 	}
+	DEFINE_FUNCTION(UChineseChessBoardSlot::execOnMeshComponentClicked)
+	{
+		P_GET_OBJECT(UPrimitiveComponent,Z_Param_ClickedComp);
+		P_GET_STRUCT(FKey,Z_Param_ButtonPressed);
+		P_FINISH;
+		P_NATIVE_BEGIN;
+		P_THIS->OnMeshComponentClicked(Z_Param_ClickedComp,Z_Param_ButtonPressed);
+		P_NATIVE_END;
+	}
 	DEFINE_FUNCTION(UChineseChessBoardSlot::execGetSlotPos)
 	{
 		P_FINISH;
@@ -102,6 +114,7 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessBoardSlot() {}
 		UClass* Class = UChineseChessBoardSlot::StaticClass();
 		static const FNameNativePtrPair Funcs[] = {
 			{ "GetSlotPos", &UChineseChessBoardSlot::execGetSlotPos },
+			{ "OnMeshComponentClicked", &UChineseChessBoardSlot::execOnMeshComponentClicked },
 			{ "SetHeightLight", &UChineseChessBoardSlot::execSetHeightLight },
 		};
 		FNativeFunctionRegistrar::RegisterFunctions(Class, Funcs, UE_ARRAY_COUNT(Funcs));
@@ -136,6 +149,50 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessBoardSlot() {}
 		if (!ReturnFunction)
 		{
 			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_UChineseChessBoardSlot_GetSlotPos_Statics::FuncParams);
+		}
+		return ReturnFunction;
+	}
+	struct Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics
+	{
+		struct ChineseChessBoardSlot_eventOnMeshComponentClicked_Parms
+		{
+			UPrimitiveComponent* ClickedComp;
+			FKey ButtonPressed;
+		};
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam NewProp_ClickedComp_MetaData[];
+#endif
+		static const UECodeGen_Private::FObjectPropertyParams NewProp_ClickedComp;
+		static const UECodeGen_Private::FStructPropertyParams NewProp_ButtonPressed;
+		static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
+#if WITH_METADATA
+		static const UECodeGen_Private::FMetaDataPairParam Function_MetaDataParams[];
+#endif
+		static const UECodeGen_Private::FFunctionParams FuncParams;
+	};
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::NewProp_ClickedComp_MetaData[] = {
+		{ "EditInline", "true" },
+	};
+#endif
+	const UECodeGen_Private::FObjectPropertyParams Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::NewProp_ClickedComp = { "ClickedComp", nullptr, (EPropertyFlags)0x0010000000080080, UECodeGen_Private::EPropertyGenFlags::Object, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(ChineseChessBoardSlot_eventOnMeshComponentClicked_Parms, ClickedComp), Z_Construct_UClass_UPrimitiveComponent_NoRegister, METADATA_PARAMS(Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::NewProp_ClickedComp_MetaData, UE_ARRAY_COUNT(Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::NewProp_ClickedComp_MetaData)) };
+	const UECodeGen_Private::FStructPropertyParams Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::NewProp_ButtonPressed = { "ButtonPressed", nullptr, (EPropertyFlags)0x0010000000000080, UECodeGen_Private::EPropertyGenFlags::Struct, RF_Public|RF_Transient|RF_MarkAsNative, 1, nullptr, nullptr, STRUCT_OFFSET(ChineseChessBoardSlot_eventOnMeshComponentClicked_Parms, ButtonPressed), Z_Construct_UScriptStruct_FKey, METADATA_PARAMS(nullptr, 0) }; // 2101135134
+	const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::PropPointers[] = {
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::NewProp_ClickedComp,
+		(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::NewProp_ButtonPressed,
+	};
+#if WITH_METADATA
+	const UECodeGen_Private::FMetaDataPairParam Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::Function_MetaDataParams[] = {
+		{ "ModuleRelativePath", "Public/ChineseChess/ChineseChessBoardSlot.h" },
+	};
+#endif
+	const UECodeGen_Private::FFunctionParams Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::FuncParams = { (UObject*(*)())Z_Construct_UClass_UChineseChessBoardSlot, nullptr, "OnMeshComponentClicked", nullptr, nullptr, sizeof(Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::ChineseChessBoardSlot_eventOnMeshComponentClicked_Parms), Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::PropPointers, UE_ARRAY_COUNT(Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::PropPointers), RF_Public|RF_Transient|RF_MarkAsNative, (EFunctionFlags)0x00080401, 0, 0, METADATA_PARAMS(Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::Function_MetaDataParams, UE_ARRAY_COUNT(Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::Function_MetaDataParams)) };
+	UFunction* Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked()
+	{
+		static UFunction* ReturnFunction = nullptr;
+		if (!ReturnFunction)
+		{
+			UECodeGen_Private::ConstructUFunction(&ReturnFunction, Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked_Statics::FuncParams);
 		}
 		return ReturnFunction;
 	}
@@ -225,6 +282,7 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessBoardSlot() {}
 	};
 	const FClassFunctionLinkInfo Z_Construct_UClass_UChineseChessBoardSlot_Statics::FuncInfo[] = {
 		{ &Z_Construct_UFunction_UChineseChessBoardSlot_GetSlotPos, "GetSlotPos" }, // 94961109
+		{ &Z_Construct_UFunction_UChineseChessBoardSlot_OnMeshComponentClicked, "OnMeshComponentClicked" }, // 3721262551
 		{ &Z_Construct_UFunction_UChineseChessBoardSlot_SetHeightLight, "SetHeightLight" }, // 1144925475
 	};
 #if WITH_METADATA
@@ -342,9 +400,9 @@ void EmptyLinkFunctionForGeneratedCodeChineseChessBoardSlot() {}
 		{ EHeightLightType_StaticEnum, TEXT("EHeightLightType"), &Z_Registration_Info_UEnum_EHeightLightType, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 4276614378U) },
 	};
 	const FClassRegisterCompiledInInfo Z_CompiledInDeferFile_FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessBoardSlot_h_Statics::ClassInfo[] = {
-		{ Z_Construct_UClass_UChineseChessBoardSlot, UChineseChessBoardSlot::StaticClass, TEXT("UChineseChessBoardSlot"), &Z_Registration_Info_UClass_UChineseChessBoardSlot, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(UChineseChessBoardSlot), 1434212364U) },
+		{ Z_Construct_UClass_UChineseChessBoardSlot, UChineseChessBoardSlot::StaticClass, TEXT("UChineseChessBoardSlot"), &Z_Registration_Info_UClass_UChineseChessBoardSlot, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(UChineseChessBoardSlot), 718537430U) },
 	};
-	static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessBoardSlot_h_812035038(TEXT("/Script/BoardGameDerived"),
+	static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessBoardSlot_h_3311051227(TEXT("/Script/BoardGameDerived"),
 		Z_CompiledInDeferFile_FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessBoardSlot_h_Statics::ClassInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessBoardSlot_h_Statics::ClassInfo),
 		nullptr, 0,
 		Z_CompiledInDeferFile_FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessBoardSlot_h_Statics::EnumInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_XediaDocument_Project_Unreal_5_2_PluginDev_Plugins_BoardGames_Source_BoardGameDerived_Public_ChineseChess_ChineseChessBoardSlot_h_Statics::EnumInfo));

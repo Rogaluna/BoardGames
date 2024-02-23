@@ -10,7 +10,7 @@ class AChineseChessManager;
 class UChineseChessBoardSlot;
 
 UENUM(BlueprintType)
-enum class EChineseChessPawnStatus : uint8
+enum class EChineseChessPawnState : uint8
 {
 	None			UMETA(DisplayName = "占位符(空)"),
 	Absence			UMETA(DisplayName = "不在场"),
@@ -41,7 +41,7 @@ public:
 
 	// 委托声明
 public:
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPerformDelegate, EChineseChessPawnStatus, PawnStatus);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FPerformDelegate, EChineseChessPawnState, PawnState);
 
 	// 委托
 public:
@@ -63,10 +63,10 @@ public:
 protected:
 	FString PawnType;
 	
-	UPROPERTY(Replicated, ReplicatedUsing=OnRep_ChangeStatus)
-	EChineseChessPawnStatus Status;
+	UPROPERTY(Replicated, ReplicatedUsing=OnRep_ChangeState)
+	EChineseChessPawnState State;
 	UFUNCTION()
-	void OnRep_ChangeStatus();
+	void OnRep_ChangeState();
 
 	UPROPERTY(Replicated)
 	AChineseChessManager* GameManager;
@@ -78,7 +78,7 @@ public:
 	void SetGameManager(AChineseChessManager* InGameManager);
 
 	UFUNCTION(BlueprintCallable, DisplayName ="设置状态")
-	void SetStatus(EChineseChessPawnStatus NewState);
+	void SetState(EChineseChessPawnState NewState);
 	UFUNCTION(BlueprintCallable, DisplayName="将棋子设置到槽位")
 	void SetupSlot(UChineseChessBoardSlot* NewSlot);
 
@@ -97,7 +97,6 @@ public:
 	void InitializeStatus();
 
 	void MovePawn(UChineseChessBoardSlot* NewSlot);
-	void MovePawn(const FVector2D& NewPos);
 
 	void Die();
 

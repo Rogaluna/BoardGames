@@ -13,15 +13,6 @@ class APlayerState;
 class UChineseChessHistoryRecorder;
 
 UENUM(BlueprintType)
-enum class EChineseChessPlayerSeated : uint8
-{
-	Filled				UMETA(DisplayName="完全入座"),
-	RemainBothSide		UMETA(DisplayName="等待双方入座"),
-	RemainChu			UMETA(DisplayName="等待楚入座"),
-	RemainHan			UMETA(DisplayName="等待汉入座")
-};
-
-UENUM(BlueprintType)
 enum class EChineseChessPlayer : uint8
 {
 	Chu					UMETA(DisplayName = "楚"),
@@ -29,20 +20,35 @@ enum class EChineseChessPlayer : uint8
 };
 
 UENUM(BlueprintType)
-enum class EChineseChessRoundState : uint8
+enum class EChineseChessAwaitState : uint8
 {
-	None				UMETA(DisplayName = "双方无权移动"),
-	RoundChu			UMETA(DisplayName = "楚军回合"),
-	RoundHan			UMETA(DisplayName = "汉军回合")
+	Wait_Chu			UMETA(DisplayName = "等待——楚"),
+	Wait_Han			UMETA(DisplayName = "等待——汉"),
+	Wait_BothSides		UMETA(DisplayName = "等待双方"),
+	Ready				UMETA(DisplayName = "就绪")
 };
 
-UENUM()
-enum class EChineseChessCheckState : uint8
+UENUM(BlueprintType)
+enum class EChineseChessRoundState : uint8
 {
-	None				UMETA(DisplayName = "未将军"),
+	RoundChu			UMETA(DisplayName = "楚军回合"),
+	RoundHan			UMETA(DisplayName = "汉军回合"),
+	None				UMETA(DisplayName = "双方无权移动")
+};
+
+UENUM(BlueprintType)
+enum class EChineseChessGameState : uint8
+{
+	None				UMETA(DisplayName = "占位符"),
+	GameStart			UMETA(DisplayName = "游戏开始"),
+	GameOver			UMETA(DisplayName = "游戏结束"),
+	IllegalMove			UMETA(DisplayName = "非法移动"),
 	Check				UMETA(DisplayName = "将军"),
 	CheckMate			UMETA(DisplayName = "将死"),
-	Illegal				UMETA(DisplayName = "非法移动")
+	GiveUp				UMETA(DisplayName = "认输"),
+
+	RoundSwitch			UMETA(DisplayName = "切换回合"),
+	CampSwitch			UMETA(DisplayName = "切换阵营")
 };
 
 /**
@@ -55,6 +61,29 @@ class BOARDGAMEDERIVED_API AChineseChessManager : public ABoardGameManager
 
 	// 委托声明
 public:
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FPlayerEnteredDelegate, EChineseChessPlayer, PlayerCamp, APlayerState*, Player);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FPlayerLeftDelegate, EChineseChessPlayer, PlayerCamp, APlayerState*, Player);
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGameActionDelegate, EChineseChessGameState, GameState, APlayerState*, Player);
+
+	// 委托
+public:
+	UPROPERTY(BlueprintAssignable)
+	FPlayerEnteredDelegate PlayerEntered;
+	UPROPERTY(BlueprintAssignable)
+	FPlayerLeftDelegate PlayerLeft;
+
+	UPROPERTY(BlueprintAssignable)
+	FGameActionDelegate GameAction;
+
+	// 委托触发函数
+public:
+	UFUNCTION(BlueprintCallable, DisplayName = "玩家入座")
+	void OnPlayerEntered(EChineseChessPlayer PlayerCamp, APlayerState* Player);
+	UFUNCTION(BlueprintCallable, DisplayName = "玩家离席")
+	void OnPlayerLeft(APlayerState* Player);
+
+	void OnGameAction(EChineseChessGameState GameState, APlayerState* Player);
 
 	// 构造函数
 public:
@@ -76,6 +105,9 @@ protected:
 	UPROPERTY(Replicated)
 	EChineseChessRoundState RoundState;
 
+	UPROPERTY(Replicated)
+	uint8 bIsGaming : 1;
+
 protected:
 
 	UPROPERTY(Replicated)
@@ -83,14 +115,8 @@ protected:
 
 protected:
 	/** 玩家 */
-	UPROPERTY(Replicated)
+	UPROPERTY(Replicated, ReplicatedUsing = NotifyPlayerChange)
 	TArray<APlayerState*> PlayerContainer;
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnPlayerEntered(EChineseChessPlayer PlayerCamp, APlayerState* Player);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnPlayerLeft(EChineseChessPlayer PlayerCamp, APlayerState* Player);
 
 protected:
 	/** 棋子引用 */
@@ -103,25 +129,22 @@ public:
 
 	// getter
 public:
-	UFUNCTION(BlueprintPure, DisplayName="获取历史记录器")
-	UChineseChessHistoryRecorder* GetHistoryRecorder();
+	UFUNCTION(BlueprintPure, DisplayName = "获取历史记录器")
+	UChineseChessHistoryRecorder* GetHistoryRecorder() const { return HistoryRecorder; };
+
+	UFUNCTION(BlueprintPure, DisplayName = "是否游戏中")
+	bool GetIsGameing() const { return bIsGaming; };
+
+	UFUNCTION(BlueprintPure, DisplayName = "获取棋子引用")
+	TArray<AChineseChessPawn*> GetPawnArray() const { return PawnArray; };
 
 	// operate
 public:
 	/** 选择操作 */
 	void Select(UChineseChessBoardSlot* NewSlot);
-	
-	UChineseChessBoardSlot* GetSlot(const FVector2D& InVec);
-	UChineseChessBoardSlot* GetSlot(int32 X, int32 Y);
 
 	UFUNCTION(BlueprintCallable, DisplayName="等待玩家")
-	bool WaitPlayer(EChineseChessPlayer OutPlayerCamp);
-
-	UFUNCTION(BlueprintCallable, DisplayName="玩家入座")
-	void PlayerEntered(EChineseChessPlayer PlayerCamp, APlayerState* NewPlayer);
-
-	UFUNCTION(BlueprintCallable, DisplayName="玩家离开")
-	void PlayerLeft(EChineseChessPlayer PlayerCamp, APlayerState* Player);
+	void WaitPlayer(EChineseChessAwaitState& OutAwaitState);
 
 	UFUNCTION(BlueprintPure, DisplayName="获取入座玩家")
 	APlayerState* GetPlayer(EChineseChessPlayer PlayerCamp);
@@ -130,17 +153,13 @@ public:
 	bool GetPlayerCamp(APlayerState* PlayerState, EChineseChessPlayer& PlayerCamp);
 
 	UFUNCTION(BlueprintPure, DisplayName="检查落座情况")
-	bool IsSeating(APlayerState* PlayerState);
+	bool IsEntered(APlayerState* PlayerState);
 
-	bool IsPlayerCamp(APlayerState* InPlayerState, EChineseChessPlayer& InPlayerCamp);
 	void ProcessBoardClick(UChineseChessBoardSlot* Slot, APlayerState* PlayerState/*点击主体*/);
 
 public:
 	UFUNCTION(BlueprintCallable, DisplayName="开始游戏")
 	void GameStart();
-
-	UFUNCTION(BlueprintCallable, DisplayName="重置游戏")
-	void Restart();
 
 	/** 悔棋 */
 	void Withdraw();
@@ -152,6 +171,7 @@ public:
 	void SwitchCamp(APlayerState* Player, EChineseChessPlayer TargetCamp);
 
 protected:
+	bool IsIllegal(TArray<uint8> FeatureMap, EChineseChessPlayer PlayerCamp);
 
 	/** 棋盘规则：回合切换 */
 	void RoundSwitch();
@@ -160,51 +180,27 @@ protected:
 	bool IsRound(APlayerState* PlayerState);
 
 	/** 棋盘规则：王对王 */
-	bool IsKingFaceToFace();
+	bool IsKingFaceToFace(TArray<uint8> FeatureMap);
 
 	/** 棋盘规则：将军 */
-	EChineseChessCheckState Check(bool bCheckMate = false);
+	bool Check(TArray<uint8> FeatureMap, EChineseChessPlayer PlayerCamp);
 
-	/** 检查将死 */
-	bool CheckMate(const TMap<FString, AChineseChessPawn*>& PawnMap, const FVector2D& DefenseKingPos, const TMap<FString, AChineseChessPawn*>& AttackPawnMap);
+	/** 棋盘规则：将死 */
+	bool CheckMate(TArray<uint8> FeatureMap, EChineseChessPlayer PlayerCamp);
 
 	/** 撤销操作 */
 	void RevokeOperate(int32 Num);
 
 protected:
 
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="玩家入座")
-	void OnPlayerSeated(EChineseChessPlayer Type);
-
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="回合切换")
-	void OnRoundSwitch(EChineseChessRoundState NextRound);
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="非法移动！")
-	void OnIllegal(EChineseChessRoundState ThisRound);
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="将军！")
-	void OnCheck(EChineseChessRoundState ThisRound);
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="将死！")
-	void OnCheckMate(EChineseChessRoundState ThisRound);
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="认输")
-	void OnGiveUp(EChineseChessPlayer Type);
-
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="开始游戏")
-	void OnGameStart(EChineseChessPlayerSeated SeatedState);
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="游戏结束")
-	void OnGameOver();
-
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="玩家离开")
-	void OnPlayerLeave(APlayerState* Player, EChineseChessPlayer Type);
-
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="切换阵营")
-	void OnSwitchCamp(APlayerState* Player);
-
-protected:
-
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="通知可移动槽位显现")
+	UFUNCTION(BlueprintImplementableEvent, DisplayName = "通知可移动槽位显现")
 	void NotifyMovableSlotsShow(const TArray<FVector2D>& SlotPositions);
 
-	UFUNCTION(BlueprintImplementableEvent, DisplayName="通知槽位隐藏")
+	UFUNCTION(BlueprintImplementableEvent, DisplayName = "通知槽位隐藏")
 	void NotifySlotsHide();
+
+	UFUNCTION(BlueprintImplementableEvent, DisplayName = "通知玩家变更")
+	void NotifyPlayerChange();
 
 public:
 	// 注册一个棋子到世界中
@@ -223,6 +219,11 @@ public:
 
 	// Output
 public:
-	UFUNCTION(BlueprintCallable, DisplayName="获取特征图")
+	UFUNCTION(BlueprintCallable, DisplayName = "获取当前特征图")
 	TArray<uint8> GetFeatureMap();
+
+	TArray<uint8> GetFeatureMapWithParam(const FVector2D& Start, const FVector2D& End, TArray<uint8>* OriMap = nullptr);
+
+	UFUNCTION(BlueprintCallable, DisplayName = "比较特征图")
+	bool CompareFeatureMap(TArray<uint8> SoureFeatureMap, TArray<uint8> TargetFeatureMap);
 };

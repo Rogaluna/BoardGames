@@ -111,7 +111,7 @@ void UChineseChessBoardSlot::ExitPawn()
 
 void UChineseChessBoardSlot::OnMeshComponentClicked(UPrimitiveComponent* ClickedComp, FKey ButtonPressed)
 {
-	UE_LOG(LogTemp, Log, L"ClickedSlot");
+
 	if (AChineseChessBoard* Board = Cast<AChineseChessBoard>(GetOwner()))
 	{
 		Board->OnSlotClicked(this);
